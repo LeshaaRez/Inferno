@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     },
     modalImage: {
         width: 300,
-        height: 200,
+        height: 450,
         resizeMode: 'contain',
     },
 });
