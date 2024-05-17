@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Image, ImageBackground, SafeAreaView, Text, TouchableOpacity } from 'react-native';
 import CustomButton from './components/CustomButton';
+import InfoModal from './components/InfoModal';
 
 const StartScreen = () => {
+    const [modalVisible, setModalVisible] = useState(false);
+
     return (
         <ImageBackground source={require('./assets/background/Ellipse3.png')} style={styles.container}>
             <View style={styles.header}>
-                { }
+                {}
             </View>
             <Image source={require('./assets/logo_images/image2.png')} style={styles.logo} />
             <Image source={require('./assets/logo_images/inferno_text.png')} style={styles.textLogo} />
@@ -15,7 +18,7 @@ const StartScreen = () => {
                 <View style={styles.buttonContainer}>
                     <CustomButton
                         title="Sign up"
-                        onPress={() => alert('Button clicked!')}
+                        onPress={() => setModalVisible(true)} // Открытие модального окна
                     />
                 </View>
                 <View style={styles.textContainer}>
@@ -27,6 +30,11 @@ const StartScreen = () => {
                     </Text>
                 </View>
             </SafeAreaView>
+
+            <InfoModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)} // Закрытие модального окна
+            />
         </ImageBackground>
     );
 };
@@ -55,9 +63,9 @@ const styles = StyleSheet.create({
     },
     textLogo: {
         position: 'absolute',
-        top: 425, 
-        width: 172, 
-        height: 43, 
+        top: 425,
+        width: 172,
+        height: 43,
         resizeMode: 'contain',
     },
     bottomContainer: {
