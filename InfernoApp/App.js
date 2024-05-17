@@ -3,7 +3,7 @@ import { StyleSheet, View, Image, ImageBackground, SafeAreaView, Text, Touchable
 import CustomButton from './components/CustomButton';
 import InfoModal from './components/InfoModal';
 
-const StartScreen = () => {
+const App = () => {
     const [modalVisible, setModalVisible] = useState(false);
 
     return (
@@ -92,4 +92,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default StartScreen;
+export default App;
