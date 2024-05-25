@@ -2,11 +2,21 @@
 require_once 'vendor/autoload.php';
 require_once 'google-config.php';
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+$mysqli = new mysqli("localhost", "root", "123", "inferno");
+
+if ($mysqli->connect_error) {
+    die("Connection failed: " . $mysqli->connect_error);
+}
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-if (isset($_GET['code'])) { // Corrected: Closing parenthesis was missing
+if (isset($_GET['code'])) { 
     try {
         $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
 
@@ -20,7 +30,6 @@ if (isset($_GET['code'])) { // Corrected: Closing parenthesis was missing
 
         $client->setAccessToken($token['access_token']);
 
-        // Исправлено: используйте Google\Client вместо Google_Client
         $oauth2 = new Google\Service\Oauth2($client); 
         $google_account_info = $oauth2->userinfo->get();
 
@@ -31,8 +40,14 @@ if (isset($_GET['code'])) { // Corrected: Closing parenthesis was missing
         $email = $google_account_info->email;
         $name = $google_account_info->name;
 
+        // Сохранение информации о пользователе в базу данных
+        $stmt = $mysqli->prepare("INSERT INTO user (email, username) VALUES (?, ?) ON DUPLICATE KEY UPDATE username=?");
+        $stmt->bind_param("sss", $email, $name, $name);
+        $stmt->execute();
+        $stmt->close();
+
         $_SESSION['email'] = $email;
-        $_SESSION['name'] = $name;
+        $_SESSION['username'] = $name;
 
         header('Location: index.php');
         exit();
@@ -43,3 +58,5 @@ if (isset($_GET['code'])) { // Corrected: Closing parenthesis was missing
     header('Location: login.php');
     exit();
 }
+
+$mysqli->close();

@@ -2,6 +2,27 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+
+$mysqli = new mysqli("localhost", "root", "123", "inferno");
+
+if ($mysqli->connect_error) {
+    die("Connection failed: " . $mysqli->connect_error);
+}
+
+$username = 'Имя пользователя';
+$userinfo = 'Информация о пользователе';
+
+if (isset($_SESSION['email'])) {
+    $email = $_SESSION['email'];
+    $result = $mysqli->query("SELECT username FROM user WHERE email='$email'");
+    if ($result && $row = $result->fetch_assoc()) {
+        $username = $row['username'];
+        $userinfo = "Email: $email";
+    }
+    $result->free();
+}
+
+$mysqli->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -40,11 +61,7 @@ if (session_status() == PHP_SESSION_NONE) {
                     <a class="nav-link" href="#">Главная</a>
                 </li>
                 <li class="nav-item">
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <a class="nav-link" href="#" data-toggle="modal" data-target="#loginModal">Профиль (<?php echo htmlspecialchars($_SESSION['username']); ?>)</a>
-                    <?php else: ?>
-                        <a class="nav-link" href="#" data-toggle="modal" data-target="#loginModal">Профиль</a>
-                    <?php endif; ?>
+                    <a class="nav-link" href="#">Профиль (<?php echo htmlspecialchars($username); ?>)</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Статьи</a>
@@ -64,15 +81,9 @@ if (session_status() == PHP_SESSION_NONE) {
                 <h2 class="mt-4">Профиль</h2>
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">
-                            <?php if (isset($_SESSION['user_id'])): ?>
-                                Имя пользователя: <?php echo htmlspecialchars($_SESSION['username']); ?>
-                            <?php else: ?>
-                                Имя пользователя
-                            <?php endif; ?>
-                        </h5>
-                        <p class="card-text">Информация о пользователе.</p>
-                        <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">Редактировать профиль</a>
+                        <h5 class="card-title"><?php echo htmlspecialchars($username); ?></h5>
+                        <p class="card-text"><?php echo htmlspecialchars($userinfo); ?></p>
+                        <a href="#" class="btn btn-primary">Редактировать профиль</a>
                     </div>
                 </div>
             </div>
@@ -107,36 +118,6 @@ if (session_status() == PHP_SESSION_NONE) {
             <small>© 2024 Викторина</small>
         </div>
     </footer>
-
-    <!-- Login Modal -->
-    <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="loginModalLabel">Вход</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="form-group">
-                            <label for="login">Логин</label>
-                            <input type="text" class="form-control" id="login" placeholder="Введите логин">
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Пароль</label>
-                            <input type="password" class="form-control" id="password" placeholder="Введите пароль">
-                        </div>
-                        <button type="submit" class="btn btn-success btn-block">Продолжить</button>
-                        <hr>
-                        <button type="button" class="btn btn-outline-primary btn-block" onclick="window.location.href='login.php'">Google</button>
-                        <button type="button" class="btn btn-outline-primary btn-block">Facebook</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

@@ -1,5 +1,12 @@
 {
+    "name": "leshaa/web-site",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Leshaa\\WebSite\\": "src/"
+        }
+    },
     "require": {
-        "google/apiclient": "2.0"
+        "google/apiclient": "^2.7"
     }
 }
