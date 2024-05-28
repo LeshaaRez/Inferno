@@ -1,9 +1,8 @@
-// InfoModalLogIn.js
 import React from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal, ScrollView } from 'react-native';
 import CustomButton from './CustomButton';
 
-const InfoModal = ({ visible, onClose }) => {
+const InfoModalLogIn = ({ visible, onClose }) => {
     return (
         <Modal
             animationType="slide"
@@ -13,45 +12,48 @@ const InfoModal = ({ visible, onClose }) => {
         >
             <TouchableOpacity style={styles.modalContainer} onPress={onClose} activeOpacity={1}>
                 <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
-                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                        {/* Можно добавить иконку закрытия, если нужно */}
-                    </TouchableOpacity>
-                    <View style={styles.inputContainer}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Адреса ел. пошти"
-                            placeholderTextColor="#FF8845"
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Пароль"
-                            placeholderTextColor="#FF8845"
-                            secureTextEntry
-                        />
-                    </View>
-                    <CustomButton 
-                    title="Log in"
-                    onPress={onClose} />
-                    <Text style={styles.orText}>or</Text>
-                    <View style={styles.socialContainer}>
-                        <TouchableOpacity>
-                            <Image
-                                source={require('../assets/networks_logo/google.jpg')}
-                                style={styles.socialIcon}
+                    <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                        
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Повне ім'я"
+                                placeholderTextColor="#FF8845"
                             />
-                        </TouchableOpacity>
-                        <TouchableOpacity>
-                            <Image
-                                source={require('../assets/networks_logo/facebook.jpg')}
-                                style={styles.socialIcon}
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Адреса ел. пошти"
+                                placeholderTextColor="#FF8845"
                             />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Пароль"
+                                placeholderTextColor="#FF8845"
+                                secureTextEntry
+                            />
+                        </View>
+                        <CustomButton title="Sign up" onPress={onClose} />
+                        <Text style={styles.orText}>or</Text>
+                        <View style={styles.socialContainer}>
+                            <TouchableOpacity>
+                                <Image
+                                    source={require('../assets/networks_logo/google.jpg')}
+                                    style={styles.socialIcon}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity>
+                                <Image
+                                    source={require('../assets/networks_logo/facebook.jpg')}
+                                    style={styles.socialIcon}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                        <TouchableOpacity>
+                            <Text style={styles.registerText}>
+                                Вже маєте акаунт? <Text style={styles.registerLink}>Увійдіть</Text>
+                            </Text>
                         </TouchableOpacity>
-                    </View>
-                    <TouchableOpacity>
-                        <Text style={styles.registerText}>
-                            Не маєте акаунту? <Text style={styles.registerLink}>Зареєструйтесь</Text>
-                        </Text>
-                    </TouchableOpacity>
+                    </ScrollView>
                 </View>
             </TouchableOpacity>
         </Modal>
@@ -68,15 +70,29 @@ const styles = StyleSheet.create({
     modalContent: {
         width: '100%',
         alignItems: 'center',
-        height: 450,
-        padding: 20,
         backgroundColor: 'white',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
+        paddingVertical: 30,
+    },
+    scrollViewContent: {
+        alignItems: 'center',
     },
     closeButton: {
         alignSelf: 'flex-end',
         padding: 10,
+    },
+    logo: {
+        width: 100,
+        height: 100,
+        resizeMode: 'contain',
+        marginBottom: 10,
+    },
+    textLogo: {
+        width: 150,
+        height: 30,
+        resizeMode: 'contain',
+        marginBottom: 30,
     },
     inputContainer: {
         width: '95%',
@@ -90,7 +106,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     orText: {
-        marginTop: 0.2,
+        marginTop: 20,
         fontSize: 16,
         color: '#FFA07A',
     },
@@ -112,4 +128,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default InfoModal;
+export default InfoModalLogIn;

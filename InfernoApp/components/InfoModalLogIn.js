@@ -1,4 +1,4 @@
-// InfoModalLogIn.js
+// InfomodelSignUp.js
 import React from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal } from 'react-native';
 import CustomButton from './CustomButton';

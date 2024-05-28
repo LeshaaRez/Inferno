@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Image, ImageBackground, SafeAreaView, Text, TouchableOpacity } from 'react-native';
 import CustomButton from './components/CustomButton';
 import InfoModalLogIn from './components/InfoModalLogIn';
+import InfomodelSignUp from './components/InfomodelSignUp';
 
 const StartScreen = () => {
-    const [modalVisible, setModalVisible] = useState(false);
+    const [logInModalVisible, setLogInModalVisible] = useState(false);
+    const [signUpModalVisible, setSignUpModalVisible] = useState(false);
 
     return (
         <ImageBackground source={require('./assets/background/Ellipse3.png')} style={styles.container}>
             <View style={styles.header}>
-                {}
+                {/* Заголовок, если нужно */}
             </View>
             <Image source={require('./assets/logo_images/image2.png')} style={styles.logo} />
             <Image source={require('./assets/logo_images/inferno_text.png')} style={styles.textLogo} />
@@ -18,13 +20,13 @@ const StartScreen = () => {
                 <View style={styles.buttonContainer}>
                     <CustomButton
                         title="Sign up"
-                        onPress={() => setModalVisible(true)} // Открытие модального окна
+                        onPress={() => setSignUpModalVisible(true)} // Открытие модального окна для регистрации
                     />
                 </View>
                 <View style={styles.textContainer}>
                     <Text style={styles.text}>
                         Якщо ви вже зареєстровані
-                        <TouchableOpacity onPress={() => alert('ла-ла-ла')}>
+                        <TouchableOpacity onPress={() => setLogInModalVisible(true)}>
                             <Text style={styles.linkText}> Увійдіть</Text>
                         </TouchableOpacity>
                     </Text>
@@ -32,8 +34,13 @@ const StartScreen = () => {
             </SafeAreaView>
 
             <InfoModalLogIn
-                visible={modalVisible}
-                onClose={() => setModalVisible(false)} // Закрытие модального окна
+                visible={logInModalVisible}
+                onClose={() => setLogInModalVisible(false)} // Закрытие модального окна для входа
+            />
+
+            <InfomodelSignUp
+                visible={signUpModalVisible}
+                onClose={() => setSignUpModalVisible(false)} // Закрытие модального окна для регистрации
             />
         </ImageBackground>
     );
