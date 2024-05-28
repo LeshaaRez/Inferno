@@ -10,14 +10,13 @@ const InfoModal = ({ visible, onClose }) => {
             visible={visible}
             onRequestClose={onClose}
         >
-            <View style={styles.modalContainer}>
+           <TouchableOpacity style={styles.modalContainer} onPress={onClose} activeOpacity={1}>
                 <View style={styles.modalContent}>
                     <TouchableOpacity onPress={onClose}>
-                        <Image source={require('../assets/window.png')} style={styles.modalImage} />
+                        {/* Здесь можно добавить любую информацию или компоненты */}
                     </TouchableOpacity>
-                    {/* Здесь можно добавить любую информацию или компоненты */}
                 </View>
-            </View>
+            </TouchableOpacity>
         </Modal>
     );
 };
@@ -32,16 +31,22 @@ const styles = StyleSheet.create({
     modalContent: {
         width: '100%',
         alignItems: 'center',
+        height: 450,
         padding: 20,
         backgroundColor: 'white',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
     },
-    modalImage: {
-        width: 300,
-        height: 450,
-        resizeMode: 'contain',
-    },
+
 });
 
 export default InfoModal;
+
+
+
+//<Image source={require('../assets/window.png')} style={styles.modalImage} />
+/*odalImage: {
+    width: 300,
+    height: 450,
+    resizeMode: 'contain',
+},*/
