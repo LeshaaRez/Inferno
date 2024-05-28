@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Image, ImageBackground, SafeAreaView, Text, TouchableOpacity } from 'react-native';
 import CustomButton from './components/CustomButton';
-import InfoModal from './components/InfoModal';
+import InfoModalLogIn from './components/InfoModalLogIn';
 
 const StartScreen = () => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -31,7 +31,7 @@ const StartScreen = () => {
                 </View>
             </SafeAreaView>
 
-            <InfoModal
+            <InfoModalLogIn
                 visible={modalVisible}
                 onClose={() => setModalVisible(false)} // Закрытие модального окна
             />
