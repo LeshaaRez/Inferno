@@ -4,6 +4,7 @@ import CustomButton from './components/CustomButton';
 import InfoModalLogIn from './components/InfoModalLogIn';
 import InfomodelSignUp from './components/InfomodelSignUp';
 
+
 const StartScreen = () => {
     const [logInModalVisible, setLogInModalVisible] = useState(false);
     const [signUpModalVisible, setSignUpModalVisible] = useState(false);

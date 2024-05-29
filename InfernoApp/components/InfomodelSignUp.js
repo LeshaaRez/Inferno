@@ -1,8 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal, ScrollView } from 'react-native';
+import axios from 'axios';
 import CustomButton from './CustomButton';
 
-const InfoModalLogIn = ({ visible, onClose }) => {
+const InfomodelSignUp = ({ visible, onClose }) => {
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [greeting, setGreeting] = useState('');
+
+    const handleSignUp = () => {
+        axios.post('http://192.168.1.117:3000/signup', { // Replace with your actual IP address
+            fullName,
+            email,
+            password,
+        })
+        .then(response => {
+            setGreeting(`Hi, ${fullName}`);
+            onClose();
+        })
+        .catch(error => {
+            console.error(error);
+        });
+    };
+
     return (
         <Modal
             animationType="slide"
@@ -13,46 +34,55 @@ const InfoModalLogIn = ({ visible, onClose }) => {
             <TouchableOpacity style={styles.modalContainer} onPress={onClose} activeOpacity={1}>
                 <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
                     <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                        
-                        <View style={styles.inputContainer}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Повне ім'я"
-                                placeholderTextColor="#FF8845"
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Адреса ел. пошти"
-                                placeholderTextColor="#FF8845"
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Пароль"
-                                placeholderTextColor="#FF8845"
-                                secureTextEntry
-                            />
-                        </View>
-                        <CustomButton title="Sign up" onPress={onClose} />
-                        <Text style={styles.orText}>or</Text>
-                        <View style={styles.socialContainer}>
-                            <TouchableOpacity>
-                                <Image
-                                    source={require('../assets/networks_logo/google.jpg')}
-                                    style={styles.socialIcon}
+                        {greeting ? (
+                            <Text style={styles.greeting}>{greeting}</Text>
+                        ) : (
+                            <View style={styles.inputContainer}>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Повне ім'я"
+                                    placeholderTextColor="#FF8845"
+                                    value={fullName}
+                                    onChangeText={setFullName}
                                 />
-                            </TouchableOpacity>
-                            <TouchableOpacity>
-                                <Image
-                                    source={require('../assets/networks_logo/facebook.jpg')}
-                                    style={styles.socialIcon}
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Адреса ел. пошти"
+                                    placeholderTextColor="#FF8845"
+                                    value={email}
+                                    onChangeText={setEmail}
                                 />
-                            </TouchableOpacity>
-                        </View>
-                        <TouchableOpacity>
-                            <Text style={styles.registerText}>
-                                Вже маєте акаунт? <Text style={styles.registerLink}>Увійдіть</Text>
-                            </Text>
-                        </TouchableOpacity>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Пароль"
+                                    placeholderTextColor="#FF8845"
+                                    secureTextEntry
+                                    value={password}
+                                    onChangeText={setPassword}
+                                />
+                                <CustomButton title="Sign up" onPress={handleSignUp} />
+                                <Text style={styles.orText}>or</Text>
+                                <View style={styles.socialContainer}>
+                                    <TouchableOpacity>
+                                        <Image
+                                            source={require('../assets/networks_logo/google.jpg')}
+                                            style={styles.socialIcon}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity>
+                                        <Image
+                                            source={require('../assets/networks_logo/facebook.jpg')}
+                                            style={styles.socialIcon}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                                <TouchableOpacity>
+                                    <Text style={styles.registerText}>
+                                        Вже маєте акаунт? <Text style={styles.registerLink}>Увійдіть</Text>
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
                     </ScrollView>
                 </View>
             </TouchableOpacity>
@@ -77,22 +107,6 @@ const styles = StyleSheet.create({
     },
     scrollViewContent: {
         alignItems: 'center',
-    },
-    closeButton: {
-        alignSelf: 'flex-end',
-        padding: 10,
-    },
-    logo: {
-        width: 100,
-        height: 100,
-        resizeMode: 'contain',
-        marginBottom: 10,
-    },
-    textLogo: {
-        width: 150,
-        height: 30,
-        resizeMode: 'contain',
-        marginBottom: 30,
     },
     inputContainer: {
         width: '95%',
@@ -126,6 +140,12 @@ const styles = StyleSheet.create({
     registerLink: {
         color: '#FF8845',
     },
+    greeting: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#FF8845',
+        marginVertical: 20,
+    },
 });
 
-export default InfoModalLogIn;
+export default InfomodelSignUp;
