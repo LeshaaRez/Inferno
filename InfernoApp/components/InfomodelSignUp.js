@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal, ScrollView } from 'react-native';
 import axios from 'axios';
 import CustomButton from './CustomButton';
+import { useNavigation } from '@react-navigation/native'; // Импортируем useNavigation
 
 const InfomodelSignUp = ({ visible, onClose }) => {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [greeting, setGreeting] = useState('');
+    const navigation = useNavigation(); // Используем useNavigation для получения навигации
 
     const handleSignUp = () => {
-        axios.post('http://192.168.1.117:3000/signup', { // Replace with your actual IP address
+        axios.post('http://192.168.1.7:3000/signup', { // Замените на ваш фактический IP-адрес
             fullName,
             email,
             password,
@@ -18,6 +20,7 @@ const InfomodelSignUp = ({ visible, onClose }) => {
             .then(response => {
                 setGreeting(`Hi, ${fullName}`);
                 onClose();
+                navigation.navigate('MainScreen'); // Переход на главную страницу
             })
             .catch(error => {
                 console.error(error);
@@ -110,7 +113,7 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         width: '95%',
-        alignItems: 'center',
+        alignItems: 'center', // Централизует элементы внутри
     },
     input: {
         height: 50,
@@ -119,15 +122,17 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         backgroundColor: '#FFDDC9',
         fontSize: 16,
-        width: '100%',
+        width: '100%', // Устанавливает ширину инпута в 100% от родительского элемента
     },
     orText: {
         marginTop: 20,
         fontSize: 16,
         color: '#FFA07A',
+        textAlign: 'center', // Централизует текст
     },
     socialContainer: {
         flexDirection: 'row',
+        justifyContent: 'center', // Централизует значки по горизонтали
         marginTop: 20,
     },
     socialIcon: {
@@ -138,6 +143,7 @@ const styles = StyleSheet.create({
     registerText: {
         marginTop: 20,
         fontSize: 16,
+        textAlign: 'center', // Централизует текст
     },
     registerLink: {
         color: '#FF8845',
@@ -147,6 +153,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#FF8845',
         marginVertical: 20,
+        textAlign: 'center', // Централизует текст
     },
 });
 
