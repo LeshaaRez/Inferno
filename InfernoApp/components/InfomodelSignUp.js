@@ -15,13 +15,13 @@ const InfomodelSignUp = ({ visible, onClose }) => {
             email,
             password,
         })
-        .then(response => {
-            setGreeting(`Hi, ${fullName}`);
-            onClose();
-        })
-        .catch(error => {
-            console.error(error);
-        });
+            .then(response => {
+                setGreeting(`Hi, ${fullName}`);
+                onClose();
+            })
+            .catch(error => {
+                console.error(error);
+            });
     };
 
     return (
@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         width: '95%',
+        alignItems: 'center',
     },
     input: {
         height: 50,
@@ -118,6 +119,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         backgroundColor: '#FFDDC9',
         fontSize: 16,
+        width: '100%',
     },
     orText: {
         marginTop: 20,
