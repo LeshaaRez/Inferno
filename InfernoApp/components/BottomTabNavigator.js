@@ -64,7 +64,8 @@ const styles = StyleSheet.create({
     icon: {
         width: 70,
         height: 70,
-        marginTop: -15,
+        marginTop: 40
+        
     },
     tabBar: {
         backgroundColor: 'transparent', // Сделать фон прозрачным

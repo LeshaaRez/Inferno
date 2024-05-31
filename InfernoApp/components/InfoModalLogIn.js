@@ -4,6 +4,7 @@ import CustomButton from './CustomButton';
 import axios from 'axios'; // Ensure you have axios installed
 import { useNavigation } from '@react-navigation/native'; // Ensure you have this imported
 import * as Google from 'expo-auth-session/providers/google';
+import * as Facebook from 'expo-auth-session/providers/facebook';
 import * as WebBrowser from 'expo-web-browser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -14,18 +15,28 @@ const InfoModalLogIn = ({ visible, onClose }) => {
     const [password, setPassword] = useState('');
     const navigation = useNavigation(); // Use useNavigation to get navigation
 
-    const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    const [googleRequest, googleResponse, googlePromptAsync] = Google.useIdTokenAuthRequest({
         clientId: '274956882933-mlfraac6hed4vsn4pitt3vpndkd80k5p.apps.googleusercontent.com', // Replace with your Google OAuth client ID
         redirectUri: 'com.inferno.infernoapp:/oauthredirect' // Ensure this matches your scheme
     });
 
+    const [fbRequest, fbResponse, fbPromptAsync] = Facebook.useAuthRequest({
+        clientId: '1545916023011831' // Replace with your Facebook App ID
+    });
+
     React.useEffect(() => {
-        if (response?.type === 'success') {
-            const { id_token } = response.params;
+        if (googleResponse?.type === 'success') {
+            const { id_token } = googleResponse.params;
             // Send the ID token to your server for verification and login
             handleGoogleLogin(id_token);
         }
-    }, [response]);
+
+        if (fbResponse?.type === 'success') {
+            const { access_token } = fbResponse.params;
+            // Send the access token to your server for verification and login
+            handleFacebookLogin(access_token);
+        }
+    }, [googleResponse, fbResponse]);
 
     const handleGoogleLogin = async (idToken) => {
         try {
@@ -42,11 +53,24 @@ const InfoModalLogIn = ({ visible, onClose }) => {
         }
     };
 
+    const handleFacebookLogin = async (accessToken) => {
+        try {
+            const response = await axios.post('http://192.168.1.117:3000/facebook-login', { accessToken });
+            if (response.data.success) {
+                Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
+                onClose();
+            } else {
+                Alert.alert('Login Failed', 'Facebook login failed.');
+            }
+        } catch (error) {
+            console.error('Facebook login error:', error.response ? error.response.data : error.message);
+            Alert.alert('Login Error', error.response ? error.response.data.message : 'An error occurred during Facebook login. Please try again.');
+        }
+    };
+
     const handleLogin = async () => {
         try {
-
-            const response = await axios.post('http://192.168.1.6:3000/login', { email, password });
-
+            const response = await axios.post('http://192.168.1.117:3000/login', { email, password });
             if (response.data.success) {
                 Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
                 onClose();
@@ -96,13 +120,13 @@ const InfoModalLogIn = ({ visible, onClose }) => {
                     />
                     <Text style={styles.orText}>or</Text>
                     <View style={styles.socialContainer}>
-                        <TouchableOpacity disabled={!request} onPress={() => promptAsync()}>
+                        <TouchableOpacity disabled={!googleRequest} onPress={() => googlePromptAsync()}>
                             <Image
                                 source={require('../assets/networks_logo/google.jpg')}
                                 style={styles.socialIcon}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity disabled={!fbRequest} onPress={() => fbPromptAsync()}>
                             <Image
                                 source={require('../assets/networks_logo/facebook.jpg')}
                                 style={styles.socialIcon}
