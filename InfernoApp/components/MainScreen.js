@@ -1,8 +1,26 @@
-import React from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity } from 'react-native';
 import BottomTabNavigator from './BottomTabNavigator';
+import InfoModalFilter from './InfoModalFilter';
+
+const quizzes = [
+    { id: 1, image: require('../assets/images/quiz1.webp') },
+    { id: 2, image: require('../assets/images/quiz2.webp') },
+    { id: 3, image: require('../assets/images/quiz3.webp') }
+];
 
 const MainScreen = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [filterModalVisible, setFilterModalVisible] = useState(false);
+
+    const handleNext = () => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % quizzes.length);
+    };
+
+    const handlePrev = () => {
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + quizzes.length) % quizzes.length);
+    };
+
     return (
         <View style={styles.container}>
             <ImageBackground 
@@ -24,14 +42,29 @@ const MainScreen = () => {
                             placeholder="Search"
                             placeholderTextColor="white"
                         />
-                        <Image 
-                            source={require('../assets/icons/filter.png')} 
-                            style={styles.icon}
-                        />
+                        <TouchableOpacity onPress={() => setFilterModalVisible(true)}>
+                            <Image 
+                                source={require('../assets/icons/filter.png')} 
+                                style={styles.icon}
+                            />
+                        </TouchableOpacity>
                     </View>
+                </View>
+                <View style={styles.carouselContainer}>
+                    <TouchableOpacity onPress={handlePrev} style={styles.arrow}>
+                        <Text style={styles.arrowText}>{"<"}</Text>
+                    </TouchableOpacity>
+                    <Image
+                        source={quizzes[currentIndex].image}
+                        style={styles.quizImage}
+                    />
+                    <TouchableOpacity onPress={handleNext} style={styles.arrow}>
+                        <Text style={styles.arrowText}>{">"}</Text>
+                    </TouchableOpacity>
                 </View>
             </ImageBackground>
             <BottomTabNavigator />
+            <InfoModalFilter visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} />
         </View>
     );
 };
@@ -76,6 +109,27 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20,
         resizeMode: 'contain',
+    },
+    carouselContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        height: 200,
+        marginVertical: 20,
+    },
+    quizImage: {
+        width: '70%',
+        height: '100%',
+        borderRadius: 15,
+        resizeMode: 'cover',
+    },
+    arrow: {
+        paddingHorizontal: 20,
+    },
+    arrowText: {
+        fontSize: 30,
+        color: 'white',
     },
     text: {
         fontSize: 24,
