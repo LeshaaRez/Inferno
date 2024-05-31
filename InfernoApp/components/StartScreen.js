@@ -4,7 +4,7 @@ import CustomButton from './CustomButton';
 import InfoModalLogIn from './InfoModalLogIn';
 import InfomodelSignUp from './InfomodelSignUp';
 
-const StartScreen = ({ navigation }) => { // Принимаем navigation как пропс
+const StartScreen = ({ navigation }) => {
     const [logInModalVisible, setLogInModalVisible] = useState(false);
     const [signUpModalVisible, setSignUpModalVisible] = useState(false);
 
@@ -20,7 +20,7 @@ const StartScreen = ({ navigation }) => { // Принимаем navigation ка�
                 <View style={styles.buttonContainer}>
                     <CustomButton
                         title="Sign up"
-                        onPress={() => setSignUpModalVisible(true)} // Открытие модального окна для регистрации
+                        onPress={() => setSignUpModalVisible(true)}
                     />
                 </View>
                 <View style={styles.textContainer}>
@@ -35,13 +35,14 @@ const StartScreen = ({ navigation }) => { // Принимаем navigation ка�
 
             <InfoModalLogIn
                 visible={logInModalVisible}
-                onClose={() => setLogInModalVisible(false)} // Закрытие модального окна для входа
+                onClose={() => setLogInModalVisible(false)}
+                navigation={navigation} // Passing navigation prop
             />
 
             <InfomodelSignUp
                 visible={signUpModalVisible}
-                onClose={() => setSignUpModalVisible(false)} // Закрытие модального окна для регистрации
-                navigation={navigation} // Передача навигации в компонент
+                onClose={() => setSignUpModalVisible(false)}
+                navigation={navigation} // Passing navigation prop
             />
         </ImageBackground>
     );

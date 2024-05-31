@@ -1,9 +1,29 @@
-// InfomodelSignUp.js
-import React from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal, Alert } from 'react-native';
 import CustomButton from './CustomButton';
+import axios from 'axios'; // Ensure you have axios installed
+import { useNavigation } from '@react-navigation/native'; // Ensure you have this imported
 
-const InfoModal = ({ visible, onClose }) => {
+const InfoModalLogIn = ({ visible, onClose }) => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const navigation = useNavigation(); // Use useNavigation to get navigation
+
+    const handleLogin = async () => {
+        try {
+            const response = await axios.post('http://192.168.1.117:3000/login', { email, password });
+            if (response.data.success) {
+                Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
+                onClose();
+            } else {
+                Alert.alert('Login Failed', 'Invalid email or password.');
+            }
+        } catch (error) {
+            console.error('Login error:', error.response ? error.response.data : error.message);
+            Alert.alert('Login Error', error.response ? error.response.data.message : 'An error occurred during login. Please try again.');
+        }
+    };
+
     return (
         <Modal
             animationType="slide"
@@ -14,24 +34,31 @@ const InfoModal = ({ visible, onClose }) => {
             <TouchableOpacity style={styles.modalContainer} onPress={onClose} activeOpacity={1}>
                 <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
                     <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                        {/* Можно добавить иконку закрытия, если нужно */}
+                        {/* Optional close icon */}
                     </TouchableOpacity>
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={styles.input}
                             placeholder="Адреса ел. пошти"
                             placeholderTextColor="#FF8845"
+                            value={email}
+                            onChangeText={setEmail}
+                            autoCapitalize="none"
+                            keyboardType="email-address"
                         />
                         <TextInput
                             style={styles.input}
                             placeholder="Пароль"
                             placeholderTextColor="#FF8845"
                             secureTextEntry
+                            value={password}
+                            onChangeText={setPassword}
                         />
                     </View>
                     <CustomButton 
-                    title="Log in"
-                    onPress={onClose} />
+                        title="Log in"
+                        onPress={handleLogin}
+                    />
                     <Text style={styles.orText}>or</Text>
                     <View style={styles.socialContainer}>
                         <TouchableOpacity>
@@ -112,4 +139,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default InfoModal;
+export default InfoModalLogIn;

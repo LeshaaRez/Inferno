@@ -35,6 +35,23 @@ app.post('/signup', (req, res) => {
     });
 });
 
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+    const query = 'SELECT * FROM user WHERE email = ? AND password = ?';
+    db.query(query, [email, password], (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+        if (results.length > 0) {
+            res.send({ success: true, message: 'Login successful' });
+        } else {
+            res.status(401).send({ success: false, message: 'Invalid email or password' });
+        }
+    });
+});
+
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
