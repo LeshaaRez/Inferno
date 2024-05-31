@@ -6,13 +6,15 @@ import { useNavigation } from '@react-navigation/native'; // Ensure you have thi
 import * as Google from 'expo-auth-session/providers/google';
 import * as Facebook from 'expo-auth-session/providers/facebook';
 import * as WebBrowser from 'expo-web-browser';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 WebBrowser.maybeCompleteAuthSession();
 
 const InfoModalLogIn = ({ visible, onClose }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errors, setErrors] = useState({});
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false); // Состояние для видимости пароля
     const navigation = useNavigation(); // Use useNavigation to get navigation
 
     const [googleRequest, googleResponse, googlePromptAsync] = Google.useIdTokenAuthRequest({
@@ -30,13 +32,7 @@ const InfoModalLogIn = ({ visible, onClose }) => {
             // Send the ID token to your server for verification and login
             handleGoogleLogin(id_token);
         }
-
-        if (fbResponse?.type === 'success') {
-            const { access_token } = fbResponse.params;
-            // Send the access token to your server for verification and login
-            handleFacebookLogin(access_token);
-        }
-    }, [googleResponse, fbResponse]);
+    }, [response]);
 
     const handleGoogleLogin = async (idToken) => {
         try {
@@ -69,8 +65,20 @@ const InfoModalLogIn = ({ visible, onClose }) => {
     };
 
     const handleLogin = async () => {
+        const newErrors = {};
+        if (!email) newErrors.email = true;
+        if (email && !validateEmail(email)) newErrors.emailInvalid = true;
+        if (!password) newErrors.password = true;
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
         try {
-            const response = await axios.post('http://192.168.1.117:3000/login', { email, password });
+
+            const response = await axios.post('http://192.168.1.6:3000/login', { email, password });
+
             if (response.data.success) {
                 Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
                 onClose();
@@ -97,22 +105,42 @@ const InfoModalLogIn = ({ visible, onClose }) => {
                     </TouchableOpacity>
                     <View style={styles.inputContainer}>
                         <TextInput
-                            style={styles.input}
+                            style={[
+                                styles.input,
+                                (errors.email || errors.emailInvalid) && styles.inputError
+                            ]}
                             placeholder="Адреса ел. пошти"
                             placeholderTextColor="#FF8845"
                             value={email}
-                            onChangeText={setEmail}
+                            onChangeText={text => {
+                                setEmail(text);
+                                if (text) setErrors(prev => ({ ...prev, email: false, emailInvalid: false }));
+                            }}
                             autoCapitalize="none"
                             keyboardType="email-address"
                         />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Пароль"
-                            placeholderTextColor="#FF8845"
-                            secureTextEntry
-                            value={password}
-                            onChangeText={setPassword}
-                        />
+                        {errors.emailInvalid && (
+                            <Text style={styles.errorText}>Некоректний формат ел. пошти</Text>
+                        )}
+                        <View style={[styles.input, styles.passwordContainer, errors.password && styles.inputError]}>
+                            <TextInput
+                                style={styles.passwordInput}
+                                placeholder="Пароль"
+                                placeholderTextColor="#FF8845"
+                                secureTextEntry={!isPasswordVisible}
+                                value={password}
+                                onChangeText={text => {
+                                    setPassword(text);
+                                    if (text) setErrors(prev => ({ ...prev, password: false }));
+                                }}
+                            />
+                            <TouchableOpacity
+                                style={styles.passwordToggle}
+                                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                            >
+                                <Icon name={isPasswordVisible ? 'visibility' : 'visibility-off'} size={24} color="#FF8845" />
+                            </TouchableOpacity>
+                        </View>
                     </View>
                     <CustomButton 
                         title="Log in"
@@ -174,6 +202,31 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         backgroundColor: '#FFDDC9',
         fontSize: 16,
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFDDC9',
+        borderRadius: 20,
+        marginBottom: 20,
+        paddingHorizontal: 20,
+    },
+    passwordInput: {
+        flex: 1,
+        height: 50,
+        fontSize: 16,
+    },
+    passwordToggle: {
+        marginLeft: 10,
+    },
+    inputError: {
+        borderColor: 'red',
+        borderWidth: 1,
+    },
+    errorText: {
+        color: 'red',
+        marginBottom: 15, // Уменьшенный отступ
+        marginTop: -15, 
     },
     orText: {
         marginTop: 0.2,
