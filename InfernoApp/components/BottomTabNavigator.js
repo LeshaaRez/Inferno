@@ -43,6 +43,7 @@ function BottomTabNavigator() {
                         style={styles.background}
                     />
                 ),
+                headerShown: false, // Убрать заголовок
             })}
             tabBarOptions={{
                 activeTintColor: 'orange',
@@ -51,10 +52,10 @@ function BottomTabNavigator() {
                 style: styles.tabBar,
             }}
         >
-            <Tab.Screen name="Main" component={PlaceholderScreen} />
-            <Tab.Screen name="Shop" component={PlaceholderScreen} />
-            <Tab.Screen name="Create" component={PlaceholderScreen} />
-            <Tab.Screen name="Profile" component={PlaceholderScreen} />
+            <Tab.Screen name="Main" component={PlaceholderScreen} options={{ headerShown: false }} />
+            <Tab.Screen name="Shop" component={PlaceholderScreen} options={{ headerShown: false }} />
+            <Tab.Screen name="Create" component={PlaceholderScreen} options={{ headerShown: false }} />
+            <Tab.Screen name="Profile" component={PlaceholderScreen} options={{ headerShown: false }} />
         </Tab.Navigator>
     );
 }

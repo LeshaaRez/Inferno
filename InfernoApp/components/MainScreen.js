@@ -1,64 +1,71 @@
 import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, TextInput } from 'react-native';
+import BottomTabNavigator from './BottomTabNavigator';
 
 const MainScreen = () => {
     return (
-        <ImageBackground 
-            source={require('../assets/background/Ellipse3.png')} 
-            style={styles.background}
-        >
-            <View style={styles.header}>
-                <Image 
-                    source={require('../assets/logo_images/INFERNO.png')}
-                    style={styles.logo}
-                />
-                <View style={styles.searchContainer}>
+        <View style={styles.container}>
+            <ImageBackground 
+                source={require('../assets/background/Ellipse3.png')} 
+                style={styles.background}
+            >
+                <View style={styles.header}>
                     <Image 
-                        source={require('../assets/icons/search.png')} 
-                        style={styles.icon}
+                        source={require('../assets/logo_images/INFERNO.png')}
+                        style={styles.logo}
                     />
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search"
-                        placeholderTextColor="white"
-                    />
-                    <Image 
-                        source={require('../assets/icons/filter.png')} 
-                        style={styles.icon}
-                    />
+                    <View style={styles.searchContainer}>
+                        <Image 
+                            source={require('../assets/icons/search.png')} 
+                            style={styles.icon}
+                        />
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search"
+                            placeholderTextColor="white"
+                        />
+                        <Image 
+                            source={require('../assets/icons/filter.png')} 
+                            style={styles.icon}
+                        />
+                    </View>
                 </View>
-            </View>
-        </ImageBackground>
+            </ImageBackground>
+            <BottomTabNavigator />
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
     background: {
         flex: 1,
-        resizeMode: 'cover', // Убедитесь, что изображение масштабируется
+        resizeMode: 'cover',
         justifyContent: 'flex-start',
         alignItems: 'center',
     },
     header: {
         width: '100%',
         alignItems: 'center',
-        marginTop: 50, // Отступ сверху для размещения заголовка
+        marginTop: 50,
     },
     logo: {
-        width: 120, // Уменьшаем ширину изображения
-        height: 40, // Уменьшаем высоту изображения
+        width: 120,
+        height: 40,
         resizeMode: 'contain',
-        marginBottom: 20, // Отступ снизу для логотипа
+        marginBottom: 20,
     },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: 'rgba(255, 255, 255, 0.3)',
-        borderRadius: 15, // Закругляем углы
+        borderRadius: 15,
         paddingHorizontal: 10,
         width: '90%',
         height: 47,
-        marginBottom: 20, // Отступ снизу для поиска
+        marginBottom: 20,
     },
     searchInput: {
         flex: 1,
@@ -70,16 +77,10 @@ const styles = StyleSheet.create({
         height: 20,
         resizeMode: 'contain',
     },
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     text: {
         fontSize: 24,
-        color: 'white', // Добавим цвет текста, чтобы он был виден на фоне
+        color: 'white',
     },
 });
 
 export default MainScreen;
-
