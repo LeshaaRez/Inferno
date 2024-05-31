@@ -15,13 +15,19 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.inferno.infernoapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.inferno.infernoapp"
+    },
+    "scheme": "infernoapp",
+    "extra": {
+      "oauthRedirect": "com.inferno.infernoapp:/oauthredirect"
     },
     "web": {
       "favicon": "./assets/favicon.png"
