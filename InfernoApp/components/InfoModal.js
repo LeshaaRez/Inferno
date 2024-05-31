@@ -44,9 +44,3 @@ export default InfoModal;
 
 
 
-//<Image source={require('../assets/window.png')} style={styles.modalImage} />
-/*odalImage: {
-    width: 300,
-    height: 450,
-    resizeMode: 'contain',
-},*/

@@ -52,6 +52,18 @@ app.post('/login', (req, res) => {
     });
 });
 
+app.get('/quizzes', (req, res) => {
+    const query = 'SELECT * FROM quizzes ORDER BY rating DESC LIMIT 3';
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+        res.send(results);
+    });
+});
+
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
