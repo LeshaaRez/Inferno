@@ -63,7 +63,9 @@ const MainScreen = () => {
                     </TouchableOpacity>
                 </View>
             </ImageBackground>
-            <BottomTabNavigator />
+            <View style={styles.tabNavigatorContainer}>
+                <BottomTabNavigator />
+            </View>
             <InfoModalFilter visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} />
         </View>
     );
@@ -134,6 +136,9 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 24,
         color: 'white',
+    },
+    tabNavigatorContainer: {
+        height: 70,
     },
 });
 
