@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity } from 'react-native';
-import BottomTabNavigator from './BottomTabNavigator';
 import InfoModalFilter from './InfoModalFilter';
 
 const quizzes = [
@@ -63,9 +62,6 @@ const MainScreen = () => {
                     </TouchableOpacity>
                 </View>
             </ImageBackground>
-            <View style={styles.tabNavigatorContainer}>
-                <BottomTabNavigator />
-            </View>
             <InfoModalFilter visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} />
         </View>
     );
@@ -136,9 +132,6 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 24,
         color: 'white',
-    },
-    tabNavigatorContainer: {
-        height: 70,
     },
 });
 
