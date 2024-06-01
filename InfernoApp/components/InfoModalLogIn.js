@@ -36,7 +36,7 @@ const InfoModalLogIn = ({ visible, onClose }) => {
 
     const handleGoogleLogin = async (idToken) => {
         try {
-            const response = await axios.post('http://192.168.1.7:3000/google-login', { idToken });
+            const response = await axios.post('http://192.168.1.117:3000/google-login', { idToken });
             if (response.data.success) {
                 Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
                 onClose();
@@ -60,7 +60,7 @@ const InfoModalLogIn = ({ visible, onClose }) => {
             return;
         }
         try {
-            const response = await axios.post('http://192.168.1.7:3000/login', { email, password })
+            const response = await axios.post('http://192.168.1.117:3000/login', { email, password })
            
             if (response.data.success) {
                 Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);

@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity } from 'react-native';
 import InfoModalFilter from './InfoModalFilter';
-
-const quizzes = [
-    { id: 1, image: require('../assets/images/quiz1.webp') },
-    { id: 2, image: require('../assets/images/quiz2.webp') },
-    { id: 3, image: require('../assets/images/quiz3.webp') }
-];
+import axios from 'axios';
 
 const MainScreen = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [quizzes, setQuizzes] = useState([]);
     const [filterModalVisible, setFilterModalVisible] = useState(false);
+
+    useEffect(() => {
+        axios.get('http://192.168.1.117:3000/quizzes') // Update with your server URL
+            .then(response => {
+                setQuizzes(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching quizzes:', error);
+            });
+    }, []);
 
     const handleNext = () => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % quizzes.length);
@@ -53,10 +59,12 @@ const MainScreen = () => {
                     <TouchableOpacity onPress={handlePrev} style={styles.arrow}>
                         <Text style={styles.arrowText}>{"<"}</Text>
                     </TouchableOpacity>
-                    <Image
-                        source={quizzes[currentIndex].image}
-                        style={styles.quizImage}
-                    />
+                    {quizzes.length > 0 && (
+                        <Image
+                            source={{ uri: quizzes[currentIndex].image_url }}
+                            style={styles.quizImage}
+                        />
+                    )}
                     <TouchableOpacity onPress={handleNext} style={styles.arrow}>
                         <Text style={styles.arrowText}>{">"}</Text>
                     </TouchableOpacity>

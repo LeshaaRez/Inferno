@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "4655710020",
+    "project_id": "inferno-1a6a8",
+    "storage_bucket": "inferno-1a6a8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:4655710020:android:7194fc391dcb0d57262111",
+        "android_client_info": {
+          "package_name": "com.inferno.infernoapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKxBLrqOlgKQxpQtCywRvAwVqPjA9PbIc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

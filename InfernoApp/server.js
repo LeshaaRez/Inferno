@@ -1,7 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql'); // or 'mysql2' if you are using mysql2
+const mysql = require('mysql');
 const { OAuth2Client } = require('google-auth-library');
+const admin = require('firebase-admin');
+const serviceAccount = require('./firebase-service-account.json'); // Update the path if necessary
+
 const app = express();
 const port = 3000; // Choose a port different from your MySQL port
 
@@ -21,6 +24,13 @@ db.connect(err => {
     }
     console.log('Database connected as id ' + db.threadId);
 });
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: 'inferno-1a6a8.appspot.com' // Replace with your Firebase storage bucket name
+});
+
+const bucket = admin.storage().bucket();
 
 app.use(bodyParser.json());
 
@@ -54,16 +64,26 @@ app.post('/login', (req, res) => {
     });
 });
 
-
 app.get('/quizzes', (req, res) => {
-    const query = 'SELECT * FROM quizzes ORDER BY rating DESC LIMIT 3';
-    db.query(query, (err, results) => {
+    const query = 'SELECT * FROM quiz LIMIT 3';
+    db.query(query, async (err, results) => {
         if (err) {
             console.error('Error executing query:', err.stack);
             res.status(500).send({ error: 'Database query failed' });
             return;
         }
-        res.send(results);
+
+        // Add URLs to quizzes
+        const quizzesWithUrls = await Promise.all(results.map(async quiz => {
+            const filePath = quiz.image_url.replace('gs://inferno-1a6a8.appspot.com/', '');
+            const [file] = await bucket.file(filePath).getSignedUrl({
+                action: 'read',
+                expires: '03-09-2491'
+            });
+            return { ...quiz, image_url: file };
+        }));
+
+        res.send(quizzesWithUrls);
     });
 });
 

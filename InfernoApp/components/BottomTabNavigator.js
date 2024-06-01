@@ -42,14 +42,20 @@ function BottomTabNavigator() {
             style={styles.background}
           />
         ),
+        tabBarActiveTintColor: 'orange',
+        tabBarInactiveTintColor: 'gray',
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          backgroundColor: 'transparent',
+          borderTopColor: 'transparent',
+          elevation: 0,
+          shadowOpacity: 0,
+          position: 'absolute',
+          bottom: 0,
+          width: '100%',
+        },
         headerShown: false,
       })}
-      tabBarOptions={{
-        activeTintColor: 'orange',
-        inactiveTintColor: 'gray',
-        showLabel: false,
-        style: styles.tabBar,
-      }}
     >
       <Tab.Screen name="Main" component={MainScreen} />
       <Tab.Screen name="Shop" component={PlaceholderScreen} />
@@ -64,15 +70,6 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     marginTop: -15
-  },
-  tabBar: {
-    backgroundColor: 'transparent',
-    borderTopColor: 'transparent',
-    elevation: 0,
-    shadowOpacity: 0,
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
   },
   background: {
     position: 'absolute',
