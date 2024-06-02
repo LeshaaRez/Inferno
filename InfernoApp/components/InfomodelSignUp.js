@@ -32,7 +32,7 @@ const InfomodelSignUp = ({ visible, onClose }) => {
             return;
         }
         try {
-            const response = await axios.post('http://192.168.1.7:3000/signup', { // Замените на ваш фактический IP-адрес
+            const response = await axios.post('http://192.168.31.222:3000/signup', { // Замените на ваш фактический IP-адрес
                 fullName,
                 email,
                 password,

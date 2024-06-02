@@ -15,7 +15,7 @@ const ProfileScreen = () => {
         if (!userId) {
           throw new Error('User ID not found in storage');
         }
-        const response = await fetch(`http://192.168.1.7:3000/profile?userId=${userId}`);
+        const response = await fetch(`http://192.168.31.222:3000/profile?userId=${userId}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
