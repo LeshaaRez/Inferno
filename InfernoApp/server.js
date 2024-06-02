@@ -136,7 +136,7 @@ app.get('/profile', (req, res) => {
 });
 
 app.get('/quizzes', (req, res) => {
-    const query = 'SELECT * FROM quiz LIMIT 5';
+    const query = 'SELECT * FROM quiz ORDER BY currency_amount DESC LIMIT 3';
     db.query(query, async (err, results) => {
         if (err) {
             console.error('Error executing query:', err.stack);
@@ -156,6 +156,97 @@ app.get('/quizzes', (req, res) => {
 
         res.send(quizzesWithUrls);
     });
+});
+
+
+app.get('/quiz', (req, res) => {
+    const query = 'SELECT title, image_url, currency_amount AS rating FROM quiz LIMIT 5';
+    db.query(query, async (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+
+        // Add URLs to quizzes
+        const quizzesWithUrls = await Promise.all(results.map(async quiz => {
+            const filePath = quiz.image_url.replace('gs://inferno-1a6a8.appspot.com/', '');
+            const [file] = await bucket.file(filePath).getSignedUrl({
+                action: 'read',
+                expires: '03-09-2491'
+            });
+            return { ...quiz, image_url: file };
+        }));
+
+        console.log(quizzesWithUrls);
+        res.send(quizzesWithUrls);
+    });
+});
+
+app.get('/search', (req, res) => {
+    const { query } = req.query;
+    const searchQuery = `
+        SELECT * FROM quiz 
+        WHERE title LIKE ? OR description LIKE ? OR theme LIKE ?
+    `;
+    const queryParam = `%${query}%`;
+    db.query(searchQuery, [queryParam, queryParam, queryParam], async (err, results) => {
+        if (err) {
+            console.error('Error executing search query:', err.stack);
+            res.status(500).send({ error: 'Database search query failed' });
+            return;
+        }
+
+        const quizzesWithUrls = await Promise.all(results.map(async quiz => {
+            const filePath = quiz.image_url.replace('gs://inferno-1a6a8.appspot.com/', '');
+            const [file] = await bucket.file(filePath).getSignedUrl({
+                action: 'read',
+                expires: '03-09-2491'
+            });
+            return { ...quiz, image_url: file };
+        }));
+
+        res.send(quizzesWithUrls);
+    });
+});
+
+app.post('/google-login', async (req, res) => {
+    const { idToken } = req.body;
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: '274956882933-mlfraac6hed4vsn4pitt3vpndkd80k5p.apps.googleusercontent.com', // Specify your Google OAuth client ID
+        });
+        const payload = ticket.getPayload();
+        const email = payload.email;
+
+        // Check if the user already exists in the database
+        const query = 'SELECT * FROM user WHERE email = ?';
+        db.query(query, [email], (err, results) => {
+            if (err) {
+                console.error('Error executing query:', err.stack);
+                res.status(500).send({ error: 'Database query failed' });
+                return;
+            }
+            if (results.length > 0) {
+                res.send({ success: true, message: 'Login successful' });
+            } else {
+                // Register the user if not already in the database
+                const newUserQuery = 'INSERT INTO user (email) VALUES (?)';
+                db.query(newUserQuery, [email], (err, result) => {
+                    if (err) {
+                        console.error('Error executing query:', err.stack);
+                        res.status(500).send({ error: 'Database query failed' });
+                        return;
+                    }
+                    res.send({ success: true, message: 'User registered and login successful' });
+                });
+            }
+        });
+    } catch (error) {
+        console.error('Error verifying Google ID token:', error);
+        res.status(401).send({ success: false, message: 'Invalid ID token' });
+    }
 });
 
 app.listen(port, () => {

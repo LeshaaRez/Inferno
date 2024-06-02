@@ -14,12 +14,14 @@ const InfoModalLogIn = ({ visible, onClose }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState({});
+
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const navigation = useNavigation();
 
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
         clientId: '274956882933-mlfraac6hed4vsn4pitt3vpndkd80k5p.apps.googleusercontent.com',
         redirectUri: 'com.inferno.infernoapp:/oauthredirect'
+
     });
 
     React.useEffect(() => {
@@ -37,6 +39,7 @@ const InfoModalLogIn = ({ visible, onClose }) => {
     const handleGoogleLogin = async (idToken) => {
         try {
             const response = await axios.post('http://192.168.31.222:3000/google-login', { idToken });
+
             if (response.data.success) {
                 await AsyncStorage.setItem('userId', response.data.userId.toString());
                 Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
@@ -62,6 +65,7 @@ const InfoModalLogIn = ({ visible, onClose }) => {
         }
         try {
             const response = await axios.post('http://192.168.31.222:3000/login', { email, password });
+
             if (response.data.success) {
                 await AsyncStorage.setItem('userId', response.data.userId.toString());
                 Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
