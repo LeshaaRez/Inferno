@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal, Alert } from 'react-native';
 import CustomButton from './CustomButton';
-import axios from 'axios'; // Ensure you have axios installed
-import { useNavigation } from '@react-navigation/native'; // Ensure you have this imported
+import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Импортируем иконки
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -13,18 +14,17 @@ const InfoModalLogIn = ({ visible, onClose }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState({});
-    const [isPasswordVisible, setIsPasswordVisible] = useState(false); // Состояние для видимости пароля
-    const navigation = useNavigation(); // Use useNavigation to get navigation
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const navigation = useNavigation();
 
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-        clientId: '274956882933-mlfraac6hed4vsn4pitt3vpndkd80k5p.apps.googleusercontent.com', // Replace with your Google OAuth client ID
-        redirectUri: 'com.inferno.infernoapp:/oauthredirect' // Ensure this matches your scheme
+        clientId: '274956882933-mlfraac6hed4vsn4pitt3vpndkd80k5p.apps.googleusercontent.com',
+        redirectUri: 'com.inferno.infernoapp:/oauthredirect'
     });
 
     React.useEffect(() => {
         if (response?.type === 'success') {
             const { id_token } = response.params;
-            // Send the ID token to your server for verification and login
             handleGoogleLogin(id_token);
         }
     }, [response]);
@@ -36,8 +36,9 @@ const InfoModalLogIn = ({ visible, onClose }) => {
 
     const handleGoogleLogin = async (idToken) => {
         try {
-            const response = await axios.post('http://192.168.1.117:3000/google-login', { idToken });
+            const response = await axios.post('http://192.168.31.222:3000/google-login', { idToken });
             if (response.data.success) {
+                await AsyncStorage.setItem('userId', response.data.userId.toString());
                 Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
                 onClose();
             } else {
@@ -60,9 +61,9 @@ const InfoModalLogIn = ({ visible, onClose }) => {
             return;
         }
         try {
-            const response = await axios.post('http://192.168.1.117:3000/login', { email, password })
-           
+            const response = await axios.post('http://192.168.31.222:3000/login', { email, password });
             if (response.data.success) {
+                await AsyncStorage.setItem('userId', response.data.userId.toString());
                 Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
                 onClose();
             } else {

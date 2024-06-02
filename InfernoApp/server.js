@@ -4,6 +4,7 @@ const mysql = require('mysql');
 const { OAuth2Client } = require('google-auth-library');
 const admin = require('firebase-admin');
 const serviceAccount = require('./firebase-service-account.json'); // Update the path if necessary
+const cors = require('cors');
 
 const app = express();
 const port = 3000; // Choose a port different from your MySQL port
@@ -33,6 +34,7 @@ admin.initializeApp({
 const bucket = admin.storage().bucket();
 
 app.use(bodyParser.json());
+app.use(cors()); // Добавьте это для включения CORS
 
 app.post('/signup', (req, res) => {
     const { fullName, email, password } = req.body;
@@ -43,13 +45,13 @@ app.post('/signup', (req, res) => {
             res.status(500).send({ error: 'Database query failed' });
             return;
         }
-        res.send({ message: 'User registered successfully' });
+        res.send({ message: 'User registered successfully', userId: result.insertId }); // Возвращаем userId
     });
 });
 
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
-    const query = 'SELECT * FROM user WHERE email = ? AND password = ?';
+    const query = 'SELECT user_id FROM user WHERE email = ? AND password = ?';
     db.query(query, [email, password], (err, results) => {
         if (err) {
             console.error('Error executing query:', err.stack);
@@ -57,15 +59,84 @@ app.post('/login', (req, res) => {
             return;
         }
         if (results.length > 0) {
-            res.send({ success: true, message: 'Login successful' });
+            const userId = results[0].user_id;
+            res.send({ success: true, userId: userId }); // Возвращаем ID пользователя
         } else {
             res.status(401).send({ success: false, message: 'Invalid email or password' });
         }
     });
 });
 
+app.post('/google-login', async (req, res) => {
+    const { idToken } = req.body;
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: '274956882933-mlfraac6hed4vsn4pitt3vpndkd80k5p.apps.googleusercontent.com', // Specify your Google OAuth client ID
+        });
+        const payload = ticket.getPayload();
+        const email = payload.email;
+
+        // Check if the user already exists in the database
+        const query = 'SELECT user_id FROM user WHERE email = ?';
+        db.query(query, [email], (err, results) => {
+            if (err) {
+                console.error('Error executing query:', err.stack);
+                res.status(500).send({ error: 'Database query failed' });
+                return;
+            }
+            if (results.length > 0) {
+                res.send({ success: true, userId: results[0].user_id });
+            } else {
+                // Register the user if not already in the database
+                const newUserQuery = 'INSERT INTO user (email) VALUES (?)';
+                db.query(newUserQuery, [email], (err, result) => {
+                    if (err) {
+                        console.error('Error executing query:', err.stack);
+                        res.status(500).send({ error: 'Database query failed' });
+                        return;
+                    }
+                    res.send({ success: true, userId: result.insertId });
+                });
+            }
+        });
+    } catch (error) {
+        console.error('Error verifying Google ID token:', error);
+        res.status(401).send({ success: false, message: 'Invalid ID token' });
+    }
+});
+
+app.get('/profile', (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) {
+        return res.status(400).send({ error: 'User ID is required' });
+    }
+
+    const profileQuery = `
+        SELECT 
+            u.username,
+            (SELECT COUNT(*) FROM userachieve WHERE user_id = ?) as achievementsCount,
+            (SELECT COUNT(*) FROM result WHERE user_id = ?) as quizzesCount
+        FROM user u
+        WHERE u.user_id = ?
+    `;
+
+    db.query(profileQuery, [userId, userId, userId], (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+        if (results.length > 0) {
+            res.json(results[0]);
+        } else {
+            res.status(404).send({ error: 'Profile not found' });
+        }
+    });
+});
+
 app.get('/quizzes', (req, res) => {
-    const query = 'SELECT * FROM quiz LIMIT 3';
+    const query = 'SELECT * FROM quiz LIMIT 5';
     db.query(query, async (err, results) => {
         if (err) {
             console.error('Error executing query:', err.stack);
@@ -85,45 +156,6 @@ app.get('/quizzes', (req, res) => {
 
         res.send(quizzesWithUrls);
     });
-});
-
-app.post('/google-login', async (req, res) => {
-    const { idToken } = req.body;
-    try {
-        const ticket = await client.verifyIdToken({
-            idToken,
-            audience: '274956882933-mlfraac6hed4vsn4pitt3vpndkd80k5p.apps.googleusercontent.com', // Specify your Google OAuth client ID
-        });
-        const payload = ticket.getPayload();
-        const email = payload.email;
-
-        // Check if the user already exists in the database
-        const query = 'SELECT * FROM user WHERE email = ?';
-        db.query(query, [email], (err, results) => {
-            if (err) {
-                console.error('Error executing query:', err.stack);
-                res.status(500).send({ error: 'Database query failed' });
-                return;
-            }
-            if (results.length > 0) {
-                res.send({ success: true, message: 'Login successful' });
-            } else {
-                // Register the user if not already in the database
-                const newUserQuery = 'INSERT INTO user (email) VALUES (?)';
-                db.query(newUserQuery, [email], (err, result) => {
-                    if (err) {
-                        console.error('Error executing query:', err.stack);
-                        res.status(500).send({ error: 'Database query failed' });
-                        return;
-                    }
-                    res.send({ success: true, message: 'User registered and login successful' });
-                });
-            }
-        });
-    } catch (error) {
-        console.error('Error verifying Google ID token:', error);
-        res.status(401).send({ success: false, message: 'Invalid ID token' });
-    }
 });
 
 app.listen(port, () => {

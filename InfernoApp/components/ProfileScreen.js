@@ -1,7 +1,44 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import ProfileSettingsModal from './ProfileSettingsModal'; // Импортируйте новый компонент
 
 const ProfileScreen = () => {
+  const [profile, setProfile] = useState(null);
+  const [error, setError] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        if (!userId) {
+          throw new Error('User ID not found in storage');
+        }
+        const response = await fetch(`http://192.168.31.222:3000/profile?userId=${userId}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const result = await response.json();
+        setProfile(result);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setError(error.toString());
+        Alert.alert('Error', error.toString());
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (error) {
+    return <Text>Error: {error}</Text>;
+  }
+
+  if (!profile) {
+    return <Text>Loading...</Text>;
+  }
+
   return (
     <ImageBackground 
       source={require('../assets/background/Ellipse3.png')} // Убедитесь, что путь к фоновому изображению корректный
@@ -16,7 +53,7 @@ const ProfileScreen = () => {
             />
           </TouchableOpacity>
           <Text style={styles.headerText}>Профіль</Text>
-          <TouchableOpacity style={styles.editButton}>
+          <TouchableOpacity style={styles.editButton} onPress={() => setIsModalVisible(true)}>
             <Image 
               source={require('../assets/icons/edit.png')} // Убедитесь, что путь к изображению корректный
               style={styles.editIcon}
@@ -24,16 +61,16 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
         <View style={styles.profileHeader}>
-          <Image source={{ uri: 'https://path-to-your-image.png' }} style={styles.profileImage} />
-          <Text style={styles.profileName}>Cat</Text>
+          <Image source={require('../assets/profile/avatar.jpg')} style={styles.profileImage} />
+          <Text style={styles.profileName}>{profile.username}</Text>
         </View>
         <View style={styles.statsContainer}>
           <View style={styles.stat}>
-            <Text style={styles.statNumber}>150</Text>
+            <Text style={styles.statNumber}>{profile.achievementsCount}</Text>
             <Text style={styles.statLabel}>досягнень</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statNumber}>100</Text>
+            <Text style={styles.statNumber}>{profile.quizzesCount}</Text>
             <Text style={styles.statLabel}>вікторин</Text>
           </View>
         </View>
@@ -72,6 +109,11 @@ const ProfileScreen = () => {
           />
         </TouchableOpacity>
       </ScrollView>
+      <ProfileSettingsModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        profile={profile}
+      />
     </ImageBackground>
   );
 };

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal, ScrollView } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal, ScrollView, Alert } from 'react-native';
 import axios from 'axios';
 import CustomButton from './CustomButton';
 import { useNavigation } from '@react-navigation/native'; // Импортируем useNavigation
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Импортируем иконки
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const InfomodelSignUp = ({ visible, onClose }) => {
     const [fullName, setFullName] = useState('');
@@ -19,7 +20,7 @@ const InfomodelSignUp = ({ visible, onClose }) => {
         return emailRegex.test(email);
     };
 
-    const handleSignUp = () => {
+    const handleSignUp = async () => {
         const newErrors = {};
         if (!fullName) newErrors.fullName = true;
         if (!email) newErrors.email = true;
@@ -31,20 +32,25 @@ const InfomodelSignUp = ({ visible, onClose }) => {
             return;
         }
 
-        axios.post('http://192.168.1.117:3000/signup', { // Замените на ваш фактический IP-адрес
+        try {
+            const response = await axios.post('http://192.168.31.222:3000/signup', { // Замените на ваш фактический IP-адрес
+                fullName,
+                email,
+                password,
+            });
 
-            fullName,
-            email,
-            password,
-        })
-            .then(response => {
+            if (response.data.userId) {
+                await AsyncStorage.setItem('userId', response.data.userId.toString());
                 setGreeting(`Hi, ${fullName}`);
                 onClose();
                 navigation.navigate('MainScreen'); // Переход на главную страницу
-            })
-            .catch(error => {
-                console.error(error);
-            });
+            } else {
+                Alert.alert('Registration Failed', 'An error occurred during registration.');
+            }
+        } catch (error) {
+            console.error(error);
+            Alert.alert('Registration Error', error.message);
+        }
     };
 
     return (
