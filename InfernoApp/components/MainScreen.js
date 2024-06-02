@@ -1,45 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import InfoModalFilter from './InfoModalFilter';
 import axios from 'axios';
 
 const MainScreen = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [quizzes, setQuizzes] = useState([]);
+    const [topQuizzes, setTopQuizzes] = useState([]);
+    const [bottomQuizzes, setBottomQuizzes] = useState([]);
     const [filterModalVisible, setFilterModalVisible] = useState(false);
 
     useEffect(() => {
-        axios.get('http://192.168.1.117:3000/quizzes') // Update with your server URL
-            .then(response => {
-                setQuizzes(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching quizzes:', error);
-            });
+        fetchTopQuizzes();
+        fetchBottomQuizzes();
     }, []);
 
+    useEffect(() => {
+        if (topQuizzes.length > 0) {
+            const intervalId = setInterval(() => {
+                setCurrentIndex((prevIndex) => (prevIndex + 1) % topQuizzes.length);
+            }, 5000);
+
+            return () => clearInterval(intervalId);
+        }
+    }, [topQuizzes]);
+
+    const fetchTopQuizzes = async () => {
+        try {
+            const response = await axios.get('http://192.168.1.7:3000/quizzes');
+            setTopQuizzes(response.data);
+        } catch (error) {
+            console.error('Error fetching top quizzes:', error);
+        }
+    };
+
+    const fetchBottomQuizzes = async () => {
+        try {
+            const response = await axios.get('http://192.168.1.7:3000/quiz');
+            console.log(response.data);
+            setBottomQuizzes(response.data);
+        } catch (error) {
+            console.error('Error fetching bottom quizzes:', error);
+        }
+    };
+
     const handleNext = () => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % quizzes.length);
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % topQuizzes.length);
     };
 
     const handlePrev = () => {
-        setCurrentIndex((prevIndex) => (prevIndex - 1 + quizzes.length) % quizzes.length);
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + topQuizzes.length) % topQuizzes.length);
     };
 
     return (
         <View style={styles.container}>
-            <ImageBackground 
-                source={require('../assets/background/Ellipse3.png')} 
+            <ImageBackground
+                source={require('../assets/background/Ellipse3.png')}
                 style={styles.background}
             >
                 <View style={styles.header}>
-                    <Image 
+                    <Image
                         source={require('../assets/logo_images/INFERNO.png')}
                         style={styles.logo}
                     />
                     <View style={styles.searchContainer}>
-                        <Image 
-                            source={require('../assets/icons/search.png')} 
+                        <Image
+                            source={require('../assets/icons/search.png')}
                             style={styles.icon}
                         />
                         <TextInput
@@ -48,8 +73,8 @@ const MainScreen = () => {
                             placeholderTextColor="white"
                         />
                         <TouchableOpacity onPress={() => setFilterModalVisible(true)}>
-                            <Image 
-                                source={require('../assets/icons/filter.png')} 
+                            <Image
+                                source={require('../assets/icons/filter.png')}
                                 style={styles.icon}
                             />
                         </TouchableOpacity>
@@ -59,9 +84,9 @@ const MainScreen = () => {
                     <TouchableOpacity onPress={handlePrev} style={styles.arrow}>
                         <Text style={styles.arrowText}>{"<"}</Text>
                     </TouchableOpacity>
-                    {quizzes.length > 0 && (
+                    {topQuizzes.length > 0 && (
                         <Image
-                            source={{ uri: quizzes[currentIndex].image_url }}
+                            source={{ uri: topQuizzes[currentIndex].image_url }}
                             style={styles.quizImage}
                         />
                     )}
@@ -69,6 +94,31 @@ const MainScreen = () => {
                         <Text style={styles.arrowText}>{">"}</Text>
                     </TouchableOpacity>
                 </View>
+                <View style={styles.indicatorContainer}>
+                    {topQuizzes.map((_, index) => (
+                        <View
+                            key={index}
+                            style={[
+                                styles.indicator,
+                                { backgroundColor: index === currentIndex ? '#FF6347' : 'white' },
+                            ]}
+                        />
+                    ))}
+                </View>
+                <Text style={styles.specialText}>Спеціально для вас:</Text>
+                <ScrollView contentContainerStyle={styles.quizzesContainer}>
+                    {bottomQuizzes.map((quiz, index) => (
+                        <ImageBackground key={index} source={{ uri: quiz.image_url }} style={styles.quizItem}>
+                            <View style={styles.quizItemContent}>
+                                <Text style={styles.quizItemTitle}>{quiz.title}</Text>
+                                <View style={styles.quizItemRatingContainer}>
+                                    <Text style={styles.quizItemRating}>{quiz.rating}</Text>
+                                    <Image source={require('../assets/icons/rate.png')} style={styles.quizItemRatingIcon} />
+                                </View>
+                            </View>
+                        </ImageBackground>
+                    ))}
+                </ScrollView>
             </ImageBackground>
             <InfoModalFilter visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} />
         </View>
@@ -120,12 +170,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '100%',
+        width: '90%',
         height: 200,
         marginVertical: 20,
     },
     quizImage: {
-        width: '70%',
+        width: '100%',
         height: '100%',
         borderRadius: 15,
         resizeMode: 'cover',
@@ -140,6 +190,65 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 24,
         color: 'white',
+    },
+    indicatorContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    indicator: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        marginHorizontal: 5,
+    },
+    specialText: {
+        alignSelf: 'flex-start',
+        marginTop: 20,
+        marginLeft: 20,
+        fontSize: 23,
+        color: '#FF6347',
+        fontWeight: 'bold',
+    },
+    quizzesContainer: {
+        width: 400,
+        paddingHorizontal: 10,
+        paddingBottom: 20,
+        alignItems: 'center',
+    },
+    quizItem: {
+        width: '100%',
+        height: 100,
+        borderRadius: 15,
+        overflow: 'hidden',
+        marginBottom: 20,
+        justifyContent: 'flex-start',
+    },
+    quizItemContent: {
+        flex: 1,
+        justifyContent: 'space-between',
+        padding: 10,
+    },
+    quizItemTitle: {
+        fontSize: 20,
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    quizItemRatingContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+    },
+    quizItemRating: {
+        fontSize: 16,
+        color: 'white',
+        fontWeight: 'bold',
+        marginRight: 5,
+    },
+    quizItemRatingIcon: {
+        width: 20,
+        height: 24,
     },
 });
 

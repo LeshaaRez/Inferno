@@ -87,6 +87,30 @@ app.get('/quizzes', (req, res) => {
     });
 });
 
+app.get('/quiz', (req, res) => {
+    const query = 'SELECT title, image_url, currency_amount AS rating FROM quiz LIMIT 5';
+    db.query(query, async (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+
+        // Add URLs to quizzes
+        const quizzesWithUrls = await Promise.all(results.map(async quiz => {
+            const filePath = quiz.image_url.replace('gs://inferno-1a6a8.appspot.com/', '');
+            const [file] = await bucket.file(filePath).getSignedUrl({
+                action: 'read',
+                expires: '03-09-2491'
+            });
+            return { ...quiz, image_url: file };
+        }));
+
+        console.log(quizzesWithUrls);
+        res.send(quizzesWithUrls);
+    });
+});
+
 app.post('/google-login', async (req, res) => {
     const { idToken } = req.body;
     try {
