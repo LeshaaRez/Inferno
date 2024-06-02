@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import InfoModalFilter from './InfoModalFilter';
+import InfoModalQuiz from './InfoModalQuiz';
 import axios from 'axios';
 
 const MainScreen = () => {
@@ -10,6 +11,7 @@ const MainScreen = () => {
     const [filterModalVisible, setFilterModalVisible] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [filteredQuizzes, setFilteredQuizzes] = useState([]);
+    const [selectedQuiz, setSelectedQuiz] = useState(null);
 
     useEffect(() => {
         fetchTopQuizzes();
@@ -55,7 +57,7 @@ const MainScreen = () => {
     const handleSearch = (text) => {
         setSearchText(text);
         if (text) {
-            const filtered = bottomQuizzes.filter((quiz) => 
+            const filtered = bottomQuizzes.filter((quiz) =>
                 quiz.title.toLowerCase().includes(text.toLowerCase())
             );
             setFilteredQuizzes(filtered);
@@ -66,32 +68,34 @@ const MainScreen = () => {
 
     const renderQuizzes = (quizzes) => {
         return quizzes.map((quiz, index) => (
-            <ImageBackground key={index} source={{ uri: quiz.image_url }} style={styles.quizItem}>
-                <View style={styles.quizItemContent}>
-                    <Text style={styles.quizItemTitle}>{quiz.title}</Text>
-                    <View style={styles.quizItemRatingContainer}>
-                        <Text style={styles.quizItemRating}>{quiz.currency_amount}</Text>
-                        <Image source={require('../assets/icons/rate.png')} style={styles.quizItemRatingIcon} />
+            <TouchableOpacity key={index} onPress={() => setSelectedQuiz(quiz)}>
+                <ImageBackground key={index} source={{ uri: quiz.image_url }} style={styles.quizItem}>
+                    <View style={styles.quizItemContent}>
+                        <Text style={styles.quizItemTitle}>{quiz.title}</Text>
+                        <View style={styles.quizItemRatingContainer}>
+                            <Text style={styles.quizItemRating}>{quiz.currency_amount}</Text>
+                            <Image source={require('../assets/icons/rate.png')} style={styles.quizItemRatingIcon} />
+                        </View>
                     </View>
-                </View>
-            </ImageBackground>
+                </ImageBackground>
+            </TouchableOpacity >
         ));
     };
 
     return (
         <View style={styles.container}>
-            <ImageBackground 
-                source={require('../assets/background/Ellipse3.png')} 
+            <ImageBackground
+                source={require('../assets/background/Ellipse3.png')}
                 style={styles.background}
             >
                 <View style={styles.header}>
-                    <Image 
+                    <Image
                         source={require('../assets/logo_images/INFERNO.png')}
                         style={styles.logo}
                     />
                     <View style={styles.searchContainer}>
-                        <Image 
-                            source={require('../assets/icons/search.png')} 
+                        <Image
+                            source={require('../assets/icons/search.png')}
                             style={styles.icon}
                         />
                         <TextInput
@@ -102,8 +106,8 @@ const MainScreen = () => {
                             onChangeText={handleSearch}
                         />
                         <TouchableOpacity onPress={() => setFilterModalVisible(true)}>
-                            <Image 
-                                source={require('../assets/icons/filter.png')} 
+                            <Image
+                                source={require('../assets/icons/filter.png')}
                                 style={styles.icon}
                             />
                         </TouchableOpacity>
@@ -148,6 +152,7 @@ const MainScreen = () => {
                 )}
             </ImageBackground>
             <InfoModalFilter visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} />
+            <InfoModalQuiz visible={selectedQuiz !== null} quiz={selectedQuiz} onClose={() => setSelectedQuiz(null)} />
         </View>
     );
 };
@@ -246,7 +251,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     quizItem: {
-        width: '100%',
+        width: 400,
         height: 100,
         borderRadius: 15,
         overflow: 'hidden',
