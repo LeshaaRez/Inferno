@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   icon: {
     width: 70,
     height: 70,
-    marginTop: -15
+    marginTop: 40
   },
   background: {
     position: 'absolute',

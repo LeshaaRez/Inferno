@@ -8,6 +8,8 @@ const MainScreen = () => {
     const [topQuizzes, setTopQuizzes] = useState([]);
     const [bottomQuizzes, setBottomQuizzes] = useState([]);
     const [filterModalVisible, setFilterModalVisible] = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const [filteredQuizzes, setFilteredQuizzes] = useState([]);
 
     useEffect(() => {
         fetchTopQuizzes();
@@ -36,7 +38,6 @@ const MainScreen = () => {
     const fetchBottomQuizzes = async () => {
         try {
             const response = await axios.get('http://192.168.1.7:3000/quiz');
-            console.log(response.data);
             setBottomQuizzes(response.data);
         } catch (error) {
             console.error('Error fetching bottom quizzes:', error);
@@ -51,74 +52,100 @@ const MainScreen = () => {
         setCurrentIndex((prevIndex) => (prevIndex - 1 + topQuizzes.length) % topQuizzes.length);
     };
 
+    const handleSearch = (text) => {
+        setSearchText(text);
+        if (text) {
+            const filtered = bottomQuizzes.filter((quiz) => 
+                quiz.title.toLowerCase().includes(text.toLowerCase())
+            );
+            setFilteredQuizzes(filtered);
+        } else {
+            setFilteredQuizzes([]);
+        }
+    };
+
+    const renderQuizzes = (quizzes) => {
+        return quizzes.map((quiz, index) => (
+            <ImageBackground key={index} source={{ uri: quiz.image_url }} style={styles.quizItem}>
+                <View style={styles.quizItemContent}>
+                    <Text style={styles.quizItemTitle}>{quiz.title}</Text>
+                    <View style={styles.quizItemRatingContainer}>
+                        <Text style={styles.quizItemRating}>{quiz.currency_amount}</Text>
+                        <Image source={require('../assets/icons/rate.png')} style={styles.quizItemRatingIcon} />
+                    </View>
+                </View>
+            </ImageBackground>
+        ));
+    };
+
     return (
         <View style={styles.container}>
-            <ImageBackground
-                source={require('../assets/background/Ellipse3.png')}
+            <ImageBackground 
+                source={require('../assets/background/Ellipse3.png')} 
                 style={styles.background}
             >
                 <View style={styles.header}>
-                    <Image
+                    <Image 
                         source={require('../assets/logo_images/INFERNO.png')}
                         style={styles.logo}
                     />
                     <View style={styles.searchContainer}>
-                        <Image
-                            source={require('../assets/icons/search.png')}
+                        <Image 
+                            source={require('../assets/icons/search.png')} 
                             style={styles.icon}
                         />
                         <TextInput
                             style={styles.searchInput}
                             placeholder="Search"
                             placeholderTextColor="white"
+                            value={searchText}
+                            onChangeText={handleSearch}
                         />
                         <TouchableOpacity onPress={() => setFilterModalVisible(true)}>
-                            <Image
-                                source={require('../assets/icons/filter.png')}
+                            <Image 
+                                source={require('../assets/icons/filter.png')} 
                                 style={styles.icon}
                             />
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View style={styles.carouselContainer}>
-                    <TouchableOpacity onPress={handlePrev} style={styles.arrow}>
-                        <Text style={styles.arrowText}>{"<"}</Text>
-                    </TouchableOpacity>
-                    {topQuizzes.length > 0 && (
-                        <Image
-                            source={{ uri: topQuizzes[currentIndex].image_url }}
-                            style={styles.quizImage}
-                        />
-                    )}
-                    <TouchableOpacity onPress={handleNext} style={styles.arrow}>
-                        <Text style={styles.arrowText}>{">"}</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.indicatorContainer}>
-                    {topQuizzes.map((_, index) => (
-                        <View
-                            key={index}
-                            style={[
-                                styles.indicator,
-                                { backgroundColor: index === currentIndex ? '#FF6347' : 'white' },
-                            ]}
-                        />
-                    ))}
-                </View>
-                <Text style={styles.specialText}>Спеціально для вас:</Text>
-                <ScrollView contentContainerStyle={styles.quizzesContainer}>
-                    {bottomQuizzes.map((quiz, index) => (
-                        <ImageBackground key={index} source={{ uri: quiz.image_url }} style={styles.quizItem}>
-                            <View style={styles.quizItemContent}>
-                                <Text style={styles.quizItemTitle}>{quiz.title}</Text>
-                                <View style={styles.quizItemRatingContainer}>
-                                    <Text style={styles.quizItemRating}>{quiz.rating}</Text>
-                                    <Image source={require('../assets/icons/rate.png')} style={styles.quizItemRatingIcon} />
-                                </View>
-                            </View>
-                        </ImageBackground>
-                    ))}
-                </ScrollView>
+                {searchText ? (
+                    <ScrollView contentContainerStyle={styles.quizzesContainer}>
+                        {renderQuizzes(filteredQuizzes)}
+                    </ScrollView>
+                ) : (
+                    <>
+                        <View style={styles.carouselContainer}>
+                            <TouchableOpacity onPress={handlePrev} style={styles.arrow}>
+                                <Text style={styles.arrowText}>{"<"}</Text>
+                            </TouchableOpacity>
+                            {topQuizzes.length > 0 && (
+                                <Image
+                                    source={{ uri: topQuizzes[currentIndex].image_url }}
+                                    style={styles.quizImage}
+                                />
+                            )}
+                            <TouchableOpacity onPress={handleNext} style={styles.arrow}>
+                                <Text style={styles.arrowText}>{">"}</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.indicatorContainer}>
+                            {topQuizzes.map((_, index) => (
+                                <View
+                                    key={index}
+                                    style={[
+                                        styles.indicator,
+                                        { backgroundColor: index === currentIndex ? '#FF6347' : 'white' },
+                                    ]}
+                                />
+                            ))}
+                        </View>
+                        <Text style={styles.specialText}>Спеціально для вас:</Text>
+                        <ScrollView contentContainerStyle={styles.quizzesContainer}>
+                            {renderQuizzes(bottomQuizzes)}
+                        </ScrollView>
+                    </>
+                )}
             </ImageBackground>
             <InfoModalFilter visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} />
         </View>
@@ -216,6 +243,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingBottom: 20,
         alignItems: 'center',
+        marginTop: 20,
     },
     quizItem: {
         width: '100%',
