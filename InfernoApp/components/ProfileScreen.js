@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProfileSettingsModal from './ProfileSettingsModal'; // Импортируйте новый компонент
+import InfoModalHelp from './InfoModalHelp'; // Импортируйте новый компонент
 
 const ProfileScreen = () => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -15,7 +17,7 @@ const ProfileScreen = () => {
         if (!userId) {
           throw new Error('User ID not found in storage');
         }
-        const response = await fetch(`http://192.168.31.222:3000/profile?userId=${userId}`);
+        const response = await fetch(`http://192.168.1.6:3000/profile?userId=${userId}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -88,7 +90,7 @@ const ProfileScreen = () => {
             style={styles.arrowIcon}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => setIsInfoModalVisible(true)}>
           <Text style={styles.menuItemText}>Підтримка</Text>
           <Image 
             source={require('../assets/icons/arrow.png')} // Убедитесь, что путь к изображению корректный
@@ -113,6 +115,10 @@ const ProfileScreen = () => {
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
         profile={profile}
+      />
+      <InfoModalHelp
+        visible={isInfoModalVisible}
+        onClose={() => setIsInfoModalVisible(false)}
       />
     </ImageBackground>
   );
@@ -151,6 +157,7 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   editButton: {
+   
     padding: 10,
   },
   editIcon: {
