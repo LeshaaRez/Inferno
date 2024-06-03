@@ -27,7 +27,7 @@ const InfoModalFilter = ({ visible, onClose }) => {
             visible={visible}
             onRequestClose={onClose}
         >
-            <TouchableOpacity style={styles.modalContainer} onPress={onClose} activeOpacity={1}>
+            <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
                     <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                         <Text style={styles.closeButtonText}>×</Text>
@@ -90,7 +90,7 @@ const InfoModalFilter = ({ visible, onClose }) => {
                         </TouchableOpacity>
                     </ScrollView>
                 </View>
-            </TouchableOpacity>
+            </View>
         </Modal>
     );
 };
@@ -119,13 +119,14 @@ const styles = StyleSheet.create({
     },
     scrollViewContent: {
         alignItems: 'flex-start',
+        paddingBottom: 20,
     },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 20,
         alignSelf: 'center',
-        fontFamily: 'Cagliostro', // Установите шрифт здесь
+        fontFamily: 'Cagliostro', // Set the font here
         color: '#FC6636',
     },
     sectionTitle: {
