@@ -162,7 +162,7 @@ app.get('/quizzes', (req, res) => {
 
 
 app.get('/quiz', (req, res) => {
-    const query = 'SELECT title, image_url, currency_amount AS rating FROM quiz LIMIT 5';
+    const query = 'SELECT quiz_id, title, image_url, currency_amount AS rating FROM quiz LIMIT 5';
     db.query(query, async (err, results) => {
         if (err) {
             console.error('Error executing query:', err.stack);
@@ -184,6 +184,40 @@ app.get('/quiz', (req, res) => {
         res.send(quizzesWithUrls);
     });
 });
+
+app.get('/quiz_info/:id', (req, res) => {
+    const quizId = req.params.id;
+    const query = 'SELECT quiz_id, title, image_url, description FROM quiz WHERE quiz_id = ?';
+
+    db.query(query, [quizId], async (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+
+        if (results.length === 0) {
+            res.status(404).send({ error: 'Quiz not found' });
+            return;
+        }
+
+        const quiz = results[0];
+        const filePath = quiz.image_url.replace('gs://inferno-1a6a8.appspot.com/', '');
+        const [file] = await bucket.file(filePath).getSignedUrl({
+            action: 'read',
+            expires: '03-09-2491'
+        });
+
+        const quizWithUrl = {
+            title: quiz.title,
+            image_url: file,
+            description: quiz.description,
+        };
+
+        res.send(quizWithUrl);
+    });
+});
+
 
 app.get('/search', (req, res) => {
     const { query } = req.query;
