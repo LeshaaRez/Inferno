@@ -301,3 +301,41 @@ app.post('/update-profile', (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
+
+
+app.get('/quiz_questions/:quizId', async (req, res) => {
+    const { quizId } = req.params;
+    const query = `
+        SELECT q.*, quiz.background_image_url 
+        FROM question q 
+        JOIN quiz ON q.quiz_id = quiz.quiz_id 
+        WHERE q.quiz_id = ?;
+    `;
+
+    db.query(query, [quizId], async (err, results) => {
+        if (err) {
+            console.error('Error fetching questions:', err);
+            res.status(500).send({ error: 'Database query failed', details: err.message });
+            return;
+        }
+
+        if (results.length > 0) {
+            const updatedResults = await Promise.all(results.map(async question => {
+                if (question.background_image_url) {
+                    const filePath = question.background_image_url.replace('gs://inferno-1a6a8.appspot.com/', '');
+                    const [fileUrl] = await bucket.file(filePath).getSignedUrl({
+                        action: 'read',
+                        expires: '03-09-2491'
+                    });
+                    return { ...question, background_image_url: fileUrl };
+                } else {
+                    return { ...question, background_image_url: null };
+                }
+            }));
+            res.json(updatedResults);
+        } else {
+            res.status(404).send({ error: 'No questions found for this quiz' });
+        }
+    });
+});
+

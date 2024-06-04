@@ -5,7 +5,7 @@ import InfoModalFilter from './InfoModalFilter';
 import InfoModalQuizInfo from './InfoModalQuizInfo';
 import axios from 'axios';
 
-const MainScreen = () => {
+const MainScreen = ({ navigation }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [topQuizzes, setTopQuizzes] = useState([]);
     const [bottomQuizzes, setBottomQuizzes] = useState([]);
@@ -33,7 +33,7 @@ const MainScreen = () => {
 
     const fetchTopQuizzes = async () => {
         try {
-            const response = await axios.get('http://192.168.1.7:3000/quizzes');
+            const response = await axios.get('http://192.168.1.117:3000/quizzes');
             setTopQuizzes(response.data);
         } catch (error) {
             console.error('Error fetching top quizzes:', error);
@@ -42,7 +42,7 @@ const MainScreen = () => {
 
     const fetchBottomQuizzes = async () => {
         try {
-            const response = await axios.get('http://192.168.1.7:3000/quiz');
+            const response = await axios.get('http://192.168.1.117:3000/quiz');
             setBottomQuizzes(response.data);
             console.log(response.data); // Логирование данных викторины
         } catch (error) {
@@ -190,6 +190,7 @@ const MainScreen = () => {
                 visible={quizInfoModalVisible} 
                 quizId={selectedQuizId} 
                 onClose={() => setQuizInfoModalVisible(false)} 
+                navigation={navigation}
             />
         </View>
     );

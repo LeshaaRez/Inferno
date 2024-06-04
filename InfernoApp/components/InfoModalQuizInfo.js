@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from 'react-native';
 import axios from 'axios';
 
-const InfoModalQuizInfo = ({ visible, quizId, onClose }) => {
+const InfoModalQuizInfo = ({ visible, quizId, onClose, navigation }) => {
     const [quizInfo, setQuizInfo] = useState(null);
 
     useEffect(() => {
         if (quizId) {
-            console.log(`Fetching info for quizId: ${quizId}`);
             fetchQuizInfo(quizId);
         }
     }, [quizId]);
 
     const fetchQuizInfo = async (id) => {
         try {
-            const response = await axios.get(`http://192.168.1.7:3000/quiz_info/${id}`);
+            const response = await axios.get(`http://192.168.1.117:3000/quiz_info/${id}`);
             setQuizInfo(response.data);
         } catch (error) {
             console.error('Error fetching quiz info:', error);
@@ -40,6 +39,15 @@ const InfoModalQuizInfo = ({ visible, quizId, onClose }) => {
                     <Text style={styles.modalTitle}>{quizInfo.title}</Text>
                     <Image source={{ uri: quizInfo.image_url }} style={styles.quizImage} />
                     <Text style={styles.modalText}>{quizInfo.description}</Text>
+                    <TouchableOpacity 
+                        style={styles.startQuizButton}
+                        onPress={() => {
+                            onClose(); 
+                            navigation.navigate('QuizScreen', { quizId });
+                        }}
+                    >
+                        <Text style={styles.startQuizButtonText}>Начать Викторину</Text>
+                    </TouchableOpacity>
                 </View>
             </TouchableOpacity>
         </Modal>
@@ -83,6 +91,16 @@ const styles = StyleSheet.create({
     modalText: {
         fontSize: 16,
         textAlign: 'center',
+    },
+    startQuizButton: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: '#FF6347',
+        borderRadius: 5,
+    },
+    startQuizButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
     },
 });
 
