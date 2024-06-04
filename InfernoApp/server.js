@@ -115,9 +115,11 @@ app.get('/profile', (req, res) => {
     const profileQuery = `
         SELECT 
             u.username,
+            p.avatar,
             (SELECT COUNT(*) FROM userachieve WHERE user_id = ?) as achievementsCount,
             (SELECT COUNT(*) FROM result WHERE user_id = ?) as quizzesCount
         FROM user u
+        JOIN profile p ON u.user_id = p.user_id
         WHERE u.user_id = ?
     `;
 
@@ -281,6 +283,19 @@ app.post('/google-login', async (req, res) => {
         console.error('Error verifying Google ID token:', error);
         res.status(401).send({ success: false, message: 'Invalid ID token' });
     }
+});
+
+app.post('/update-profile', (req, res) => {
+    const { fullName, email, password, avatar } = req.body;
+    const query = 'UPDATE user u JOIN profile p ON u.user_id = p.user_id SET u.username = ?, u.email = ?, u.password = ?, p.avatar = ? WHERE u.user_id = ?';
+    db.query(query, [fullName, email, password, avatar, req.body.userId], (err, result) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+        res.send({ message: 'Profile updated successfully' });
+    });
 });
 
 app.listen(port, () => {
