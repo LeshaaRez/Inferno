@@ -298,6 +298,70 @@ app.post('/update-profile', (req, res) => {
     });
 });
 
+app.get('/my-quizzes', async (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) {
+      return res.status(400).send({ error: 'User ID is required' });
+    }
+  
+    const query = `
+      SELECT q.quiz_id, q.title, q.image_url, r.score, 
+             (SELECT COUNT(*) FROM question WHERE quiz_id = q.quiz_id) AS totalQuestions
+      FROM result r
+      JOIN quiz q ON r.quiz_id = q.quiz_id
+      WHERE r.user_id = ?
+    `;
+  
+    db.query(query, [userId], async (err, results) => {
+      if (err) {
+        console.error('Error executing query:', err.stack);
+        res.status(500).send({ error: 'Database query failed' });
+        return;
+      }
+  
+      // Преобразование gs:// ссылок в HTTP ссылки
+      const quizzesWithUrls = await Promise.all(results.map(async quiz => {
+        if (quiz.image_url.startsWith('gs://')) {
+          const filePath = quiz.image_url.replace('gs://inferno-1a6a8.appspot.com/', '');
+          const [file] = await bucket.file(filePath).getSignedUrl({
+            action: 'read',
+            expires: '03-09-2491'
+          });
+          quiz.image_url = file;
+        }
+        return quiz;
+      }));
+  
+      res.json(quizzesWithUrls);
+    });
+  });
+  
+  app.get('/achievements', (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) {
+        return res.status(400).send({ error: 'User ID is required' });
+    }
+
+    const achievementsQuery = `
+        SELECT 
+            a.achieve_id,
+            a.name,
+            a.description,
+            IF(ua.user_id IS NULL, 0, 1) AS achieved
+        FROM achieve a
+        LEFT JOIN userachieve ua ON a.achieve_id = ua.achieve_id AND ua.user_id = ?
+    `;
+
+    db.query(achievementsQuery, [userId], (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+        res.json(results);
+    });
+});
+
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
