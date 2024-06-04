@@ -1,28 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Modal, Image, FlatList } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ProfileSettingsModal = ({ visible, onClose, profile }) => {
+const ProfileSettingsModal = ({ visible, onClose, profile, onProfileUpdated }) => {
+    const images = [
+        { source: require('../assets/profile/profileAvatar/photo1.png'), path: 'avatar1.png' },
+        { source: require('../assets/profile/profileAvatar/photo2.png'), path: 'avatar2.png' },
+        { source: require('../assets/profile/profileAvatar/photo3.png'), path: 'avatar3.png' },
+        { source: require('../assets/profile/profileAvatar/photo4.png'), path: 'avatar4.png' },
+    ];
+
     const [fullName, setFullName] = useState(profile?.username || '');
     const [email, setEmail] = useState(profile?.email || '');
     const [password, setPassword] = useState('');
-    const [profileImage, setProfileImage] = useState(require('../assets/profile/profileAvatar/photo1.png'));
+    const [profileImage, setProfileImage] = useState(images[0].source); // Default image
+    const [profileImagePath, setProfileImagePath] = useState('avatar1.png');
     const [imagePickerVisible, setImagePickerVisible] = useState(false);
 
-    const handleSave = () => {
-        // Обработка сохранения данных профиля
-        onClose();
-    };
-
-    const images = [
-        require('../assets/profile/profileAvatar/photo1.png'),
-        require('../assets/profile/profileAvatar/photo2.png'),
-        require('../assets/profile/profileAvatar/photo3.png'),
-        require('../assets/profile/profileAvatar/photo4.png'),
-    ];
+    useEffect(() => {
+        if (profile) {
+            const currentImage = images.find(image => image.path === profile.avatar);
+            if (currentImage) {
+                setProfileImage(currentImage.source);
+                setProfileImagePath(currentImage.path);
+            }
+        }
+    }, [profile]);
 
     const handleImagePick = (image) => {
-        setProfileImage(image);
+        setProfileImage(image.source);
+        setProfileImagePath(image.path);
         setImagePickerVisible(false);
+    };
+
+    const handleSave = async () => {
+        try {
+            const userId = await AsyncStorage.getItem('userId');
+            if (!userId) {
+                console.error('User ID not found');
+                return;
+            }
+
+            const response = await axios.post('http://192.168.31.222:3000/update-profile', {
+                fullName,
+                email,
+                password,
+                avatar: profileImagePath,
+                userId,
+            });
+            console.log('Profile updated successfully:', response.data);
+            onProfileUpdated(); // Вызов функции обратного вызова для обновления профиля
+            onClose();
+        } catch (error) {
+            console.error('Error updating profile:', error);
+        }
     };
 
     return (
@@ -94,7 +126,7 @@ const ProfileSettingsModal = ({ visible, onClose, profile }) => {
                         data={images}
                         renderItem={({ item }) => (
                             <TouchableOpacity onPress={() => handleImagePick(item)}>
-                                <Image source={item} style={styles.imageOption} />
+                                <Image source={item.source} style={styles.imageOption} />
                             </TouchableOpacity>
                         )}
                         keyExtractor={(item, index) => index.toString()}
@@ -111,7 +143,7 @@ const ProfileSettingsModal = ({ visible, onClose, profile }) => {
 const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
-        justifyContent: 'flex-end', // Поднимает модальное окно выше
+        justifyContent: 'flex-end',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
@@ -119,8 +151,8 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         padding: 20,
-        width: '100%', // Устанавливает ширину модального окна на весь экран
-        height: '90%', // Ограничивает высоту модального окна
+        width: '100%',
+        height: '90%',
     },
     modalTitle: {
         marginTop: 20,
@@ -137,9 +169,9 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     profileImageWrapper: {
-        width: 150, // Уменьшенный размер
-        height: 150, // Уменьшенный размер
-        borderRadius: 75, // Половина от width и height для создания круга
+        width: 150,
+        height: 150,
+        borderRadius: 75,
         overflow: 'hidden',
         justifyContent: 'center',
         alignItems: 'center',
@@ -151,7 +183,7 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
     },
     editIconContainer: {
-        marginLeft: 15, // Отступ слева от картинки
+        marginLeft: 15,
         backgroundColor: '#FC9B37',
         borderRadius: 15,
         padding: 10,
