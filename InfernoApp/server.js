@@ -336,6 +336,31 @@ app.get('/my-quizzes', async (req, res) => {
     });
   });
   
+  app.get('/achievements', (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) {
+        return res.status(400).send({ error: 'User ID is required' });
+    }
+
+    const achievementsQuery = `
+        SELECT 
+            a.achieve_id,
+            a.name,
+            a.description,
+            IF(ua.user_id IS NULL, 0, 1) AS achieved
+        FROM achieve a
+        LEFT JOIN userachieve ua ON a.achieve_id = ua.achieve_id AND ua.user_id = ?
+    `;
+
+    db.query(achievementsQuery, [userId], (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+        res.json(results);
+    });
+});
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
