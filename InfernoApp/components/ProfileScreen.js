@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native'; // Импортируем хук useFocusEffect
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect hook
 import ProfileSettingsModal from './ProfileSettingsModal';
 import InfoModalHelp from './InfoModalHelp';
 import ProfileMyQuizzes from './ProfileMyQuizzes';
@@ -87,12 +87,16 @@ const ProfileScreen = () => {
         </View>
         <View style={styles.statsContainer}>
           <View style={styles.stat}>
-            <Text style={styles.statNumber}>{profile.achievementsCount}</Text>
-            <Text style={styles.statLabel}>досягнень</Text>
+            <View style={styles.statBox}>
+              <Text style={styles.statNumber}>{profile.achievementsCount}</Text>
+              <Text style={styles.statLabel}>досягнень</Text>
+            </View>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statNumber}>{profile.quizzesCount}</Text>
-            <Text style={styles.statLabel}>вікторин</Text>
+            <View style={styles.statBox}>
+              <Text style={styles.statNumber}>{profile.quizzesCount}</Text>
+              <Text style={styles.statLabel}>вікторин</Text>
+            </View>
           </View>
         </View>
         <TouchableOpacity style={styles.menuItem} onPress={() => setIsQuizzeModalVisible(true)}>
@@ -213,8 +217,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
     marginVertical: 20,
+    marginTop: 1,
+    marginBottom: 20,
   },
   stat: {
+    alignItems: 'center',
+    padding: 10,
+  },
+  statBox: {
+    borderWidth: 2,
+    borderColor: 'white',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     alignItems: 'center',
   },
   statNumber: {
