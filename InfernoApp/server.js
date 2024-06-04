@@ -187,7 +187,7 @@ app.get('/quiz', (req, res) => {
 
 app.get('/quiz_info/:id', (req, res) => {
     const quizId = req.params.id;
-    const query = 'SELECT quiz_id, title, image_url, description FROM quiz WHERE quiz_id = ?';
+    const query = 'SELECT quiz_id, title, image_url, description, currency_amount FROM quiz WHERE quiz_id = ?';
 
     db.query(query, [quizId], async (err, results) => {
         if (err) {
