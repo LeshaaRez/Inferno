@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import InfoModalFilter from './InfoModalFilter';
+import InfoModalQuizInfo from './InfoModalQuizInfo';
 import axios from 'axios';
 
 const MainScreen = () => {
@@ -8,12 +10,15 @@ const MainScreen = () => {
     const [topQuizzes, setTopQuizzes] = useState([]);
     const [bottomQuizzes, setBottomQuizzes] = useState([]);
     const [filterModalVisible, setFilterModalVisible] = useState(false);
+    const [quizInfoModalVisible, setQuizInfoModalVisible] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [filteredQuizzes, setFilteredQuizzes] = useState([]);
+    const [selectedQuizId, setSelectedQuizId] = useState(null);
 
     useEffect(() => {
         fetchTopQuizzes();
         fetchBottomQuizzes();
+        getStoredQuizId();
     }, []);
 
     useEffect(() => {
@@ -39,8 +44,21 @@ const MainScreen = () => {
         try {
             const response = await axios.get('http://192.168.1.7:3000/quiz');
             setBottomQuizzes(response.data);
+            console.log(response.data); // Логирование данных викторины
         } catch (error) {
             console.error('Error fetching bottom quizzes:', error);
+        }
+    };
+
+    const getStoredQuizId = async () => {
+        try {
+            const storedQuizId = await AsyncStorage.getItem('selectedQuizId');
+            if (storedQuizId !== null) {
+                setSelectedQuizId(storedQuizId);
+                setQuizInfoModalVisible(true);
+            }
+        } catch (error) {
+            console.error('Error getting stored quiz ID:', error);
         }
     };
 
@@ -64,18 +82,38 @@ const MainScreen = () => {
         }
     };
 
+    const handleQuizPress = async (quizId) => {
+        console.log(`Quiz pressed: ${quizId}`);
+        if (quizId !== undefined) {
+            try {
+                await AsyncStorage.setItem('selectedQuizId', quizId.toString());
+            } catch (error) {
+                console.error('Error storing quiz ID:', error);
+            }
+            setSelectedQuizId(quizId);
+            setQuizInfoModalVisible(true);
+        } else {
+            console.error('Quiz ID is undefined');
+        }
+    };
+
     const renderQuizzes = (quizzes) => {
-        return quizzes.map((quiz, index) => (
-            <ImageBackground key={index} source={{ uri: quiz.image_url }} style={styles.quizItem}>
-                <View style={styles.quizItemContent}>
-                    <Text style={styles.quizItemTitle}>{quiz.title}</Text>
-                    <View style={styles.quizItemRatingContainer}>
-                        <Text style={styles.quizItemRating}>{quiz.currency_amount}</Text>
-                        <Image source={require('../assets/icons/rate.png')} style={styles.quizItemRatingIcon} />
-                    </View>
-                </View>
-            </ImageBackground>
-        ));
+        return quizzes.map((quiz, index) => {
+            console.log(quiz); // Логирование каждой викторины
+            return (
+                <TouchableOpacity key={index} onPress={() => handleQuizPress(quiz.quiz_id)}>
+                    <ImageBackground source={{ uri: quiz.image_url }} style={styles.quizItem}>
+                        <View style={styles.quizItemContent}>
+                            <Text style={styles.quizItemTitle}>{quiz.title}</Text>
+                            <View style={styles.quizItemRatingContainer}>
+                                <Text style={styles.quizItemRating}>{quiz.currency_amount}</Text>
+                                <Image source={require('../assets/icons/rate.png')} style={styles.quizItemRatingIcon} />
+                            </View>
+                        </View>
+                    </ImageBackground>
+                </TouchableOpacity>
+            );
+        });
     };
 
     return (
@@ -148,6 +186,11 @@ const MainScreen = () => {
                 )}
             </ImageBackground>
             <InfoModalFilter visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} />
+            <InfoModalQuizInfo 
+                visible={quizInfoModalVisible} 
+                quizId={selectedQuizId} 
+                onClose={() => setQuizInfoModalVisible(false)} 
+            />
         </View>
     );
 };
