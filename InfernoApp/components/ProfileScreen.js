@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Alert, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect hook
 import ProfileSettingsModal from './ProfileSettingsModal';
 import InfoModalHelp from './InfoModalHelp';
 import ProfileMyQuizzes from './ProfileMyQuizzes';
 import SettingsModal from './SettingsModal';
+import BankModal from './BankModal'; // Import the BankModal
 
 const avatarImages = {
   'avatar1.png': require('../assets/profile/profileAvatar/photo1.png'),
@@ -21,6 +22,7 @@ const ProfileScreen = ({ navigation }) => {
   const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
   const [isQuizzeModalVisible, setIsQuizzeModalVisible] = useState(false);
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+  const [isBankModalVisible, setIsBankModalVisible] = useState(false); // State for Bank modal
 
   const fetchProfile = async () => {
     try {
@@ -38,6 +40,35 @@ const ProfileScreen = ({ navigation }) => {
       console.error('Error fetching profile:', error);
       setError(error.toString());
       Alert.alert('Error', error.toString());
+    }
+  };
+
+  const handlePurchase = async () => {
+    const paymentData = {
+      action: 'pay',
+      amount: '10',
+      currency: 'USD',
+      description: 'Преміум акаунт',
+      order_id: 'order_id_1',
+      version: '3',
+    };
+    try {
+      const response = await fetch('https://your-server.com/payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentData),
+      });
+      const result = await response.json();
+      if (result.success) {
+        // Open the payment form URL in the browser
+        Linking.openURL(result.payment_url);
+      } else {
+        console.error('Payment failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Error processing payment:', error);
     }
   };
 
@@ -127,7 +158,7 @@ const ProfileScreen = ({ navigation }) => {
             style={styles.arrowIcon}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.premiumButton}>
+        <TouchableOpacity style={styles.premiumButton} onPress={() => setIsBankModalVisible(true)}>
           <Image
             source={require('../assets/BuyPremiumButton.png')}
             style={styles.premiumButtonImage}
@@ -151,6 +182,11 @@ const ProfileScreen = ({ navigation }) => {
       <SettingsModal
         visible={isSettingsModalVisible}
         onClose={() => setIsSettingsModalVisible(false)}
+      />
+      <BankModal
+        visible={isBankModalVisible}
+        onClose={() => setIsBankModalVisible(false)}
+        handlePurchase={handlePurchase}
       />
     </ImageBackground>
   );
@@ -224,14 +260,6 @@ const styles = StyleSheet.create({
   stat: {
     alignItems: 'center',
     padding: 10,
-  },
-  statBox: {
-    borderWidth: 2,
-    borderColor: 'white',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    alignItems: 'center',
   },
   statBox: {
     borderWidth: 1,
