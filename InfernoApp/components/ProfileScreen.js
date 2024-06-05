@@ -231,7 +231,10 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   premiumName: {
-    color: '#FC3636',
+    color: '#fff',
+    textShadowColor: '#fff', // Цвет тени
+    textShadowOffset: { width: 0, height: 0 }, // Смещение тени
+    textShadowRadius: 10, // Радиус тени
   },
   statsContainer: {
     flexDirection: 'row',
