@@ -5,7 +5,7 @@ import InfoModalFilter from './InfoModalFilter';
 import InfoModalQuizInfo from './InfoModalQuizInfo';
 import axios from 'axios';
 
-const MainScreen = () => {
+const MainScreen = ({ navigation }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [topQuizzes, setTopQuizzes] = useState([]);
     const [bottomQuizzes, setBottomQuizzes] = useState([]);
@@ -39,7 +39,7 @@ const MainScreen = () => {
 
     const fetchTopQuizzes = async () => {
         try {
-            const response = await axios.get('http://192.168.31.222:3000/quizzes');
+            const response = await axios.get('http://192.168.1.117:3000/quizzes');
             setTopQuizzes(response.data);
         } catch (error) {
             console.error('Error fetching top quizzes:', error);
@@ -48,7 +48,7 @@ const MainScreen = () => {
 
     const fetchBottomQuizzes = async () => {
         try {
-            const response = await axios.get('http://192.168.31.222:3000/quiz');
+            const response = await axios.get('http://192.168.1.117:3000/quiz');
             setBottomQuizzes(response.data);
             setFilteredQuizzes(response.data); // Изначально показываем все викторины
             console.log(response.data); // Логирование данных викторины
@@ -115,7 +115,7 @@ const MainScreen = () => {
         }
 
         try {
-            const response = await axios.get('http://192.168.31.222:3000/filtered-quizzes', {
+            const response = await axios.get('http://192.168.1.117:3000/filtered-quizzes', {
                 params: {
                     topics: topics.join(','),
                     ratings: ratings.join(','),
@@ -229,6 +229,7 @@ const MainScreen = () => {
                 visible={quizInfoModalVisible} 
                 quizId={selectedQuizId} 
                 onClose={() => setQuizInfoModalVisible(false)} 
+                navigation={navigation}
             />
         </View>
     );
