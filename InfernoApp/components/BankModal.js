@@ -1,7 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, Modal, Dimensions, Linking, TouchableWithoutFeedback } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BankModal = ({ visible, onClose }) => {
+    const [isPremium, setIsPremium] = useState(false);
+
+    useEffect(() => {
+        const checkPremiumStatus = async () => {
+            try {
+                const userId = await AsyncStorage.getItem('userId');
+                if (!userId) {
+                    throw new Error('User ID not found in storage');
+                }
+                const response = await fetch(`http://192.168.1.7:3000/check-premium?userId=${userId}`);
+                const result = await response.json();
+                setIsPremium(result.premium);
+            } catch (error) {
+                console.error('Error checking premium status:', error);
+            }
+        };
+
+        checkPremiumStatus();
+    }, []);
+
     const handlePurchase = async (bank) => {
         const paymentData = {
             action: 'pay',
@@ -47,18 +68,24 @@ const BankModal = ({ visible, onClose }) => {
                             <Text style={styles.premiumText}>Преміум акаунт</Text>
                             <Text style={styles.priceText}>10$</Text>
                             <Text style={styles.descriptionText}>Він передбачає: необмежену кількість спроб, додаткові підказки, можливість сворювати власні вікторини.</Text>
-                            <Text style={styles.paymentText}>{"\n"}Ви можете оплатити за допомогою:</Text>
-                            <View style={styles.imagesContainer}>
-                                <TouchableOpacity onPress={() => handlePurchase('monobank')}>
-                                    <Image source={require('../assets/bank/monobank.png')} style={styles.paymentImage} />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => handlePurchase('oschad')}>
-                                    <Image source={require('../assets/bank/osad.png')} style={styles.paymentImage} />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => handlePurchase('privat24')}>
-                                    <Image source={require('../assets/bank/Privat24_Logo.png')} style={styles.paymentImage} />
-                                </TouchableOpacity>
-                            </View>
+                            {isPremium ? (
+                                <Text style={styles.paymentText}>Ви вже придбали преміум акаунт</Text>
+                            ) : (
+                                <>
+                                    <Text style={styles.paymentText}>{"\n"}Ви можете оплатити за допомогою:</Text>
+                                    <View style={styles.imagesContainer}>
+                                        <TouchableOpacity onPress={() => handlePurchase('monobank')}>
+                                            <Image source={require('../assets/bank/monobank.png')} style={styles.paymentImage} />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => handlePurchase('oschad')}>
+                                            <Image source={require('../assets/bank/osad.png')} style={styles.paymentImage} />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => handlePurchase('privat24')}>
+                                            <Image source={require('../assets/bank/Privat24_Logo.png')} style={styles.paymentImage} />
+                                        </TouchableOpacity>
+                                    </View>
+                                </>
+                            )}
                         </View>
                     </TouchableWithoutFeedback>
                 </View>
@@ -110,9 +137,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     paymentText: {
-        fontSize: 18,
-        color: '#3D3D3D',
-        marginTop: 10,
+        fontSize: 20,
+        color: '#FA4D00',
+        marginTop: 90,
     },
     imagesContainer: {
         flexDirection: 'row',
