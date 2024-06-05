@@ -474,9 +474,7 @@ app.get('/filtered-quizzes', (req, res) => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+
 
 app.get('/quiz_questions/:quizId', async (req, res) => {
     const { quizId } = req.params;
@@ -513,3 +511,6 @@ app.get('/quiz_questions/:quizId', async (req, res) => {
         }
     });
 })
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});

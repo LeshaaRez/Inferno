@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ImageB
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import CustomAlert from './CustomAlert';
 
 const CreateQuiz = () => {
     const [title, setTitle] = useState('');
@@ -68,7 +69,7 @@ const CreateQuiz = () => {
 
         if (!imageUrl) {
             isValid = false;
-            newErrors.imageUrl = 'Ссылка на картинку не може бути порожньою';
+            newErrors.imageUrl = 'Посилання на картинку не може бути порожньою';
         }
 
         if (questions.length < 5) {
@@ -229,12 +230,12 @@ const CreateQuiz = () => {
                         {errors.theme && <Text style={styles.errorText}>{errors.theme}</Text>}
                     </View>
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Ссылка на картинку</Text>
+                        <Text style={styles.label}>Посилання на зображення</Text>
                         <TextInput
                             style={[styles.input, errors.imageUrl && styles.inputError]}
                             value={imageUrl}
                             onChangeText={setImageUrl}
-                            placeholder="Введите URL картинки"
+                            placeholder="Введіть URL зображення"
                             placeholderTextColor="#ddd"
                         />
                         {errors.imageUrl && <Text style={styles.errorText}>{errors.imageUrl}</Text>}
