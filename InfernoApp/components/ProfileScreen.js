@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Alert, Linking } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Alert, Linking, handlePurchase } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect hook
 import ProfileSettingsModal from './ProfileSettingsModal';
@@ -17,6 +17,7 @@ const avatarImages = {
 
 const ProfileScreen = ({ navigation }) => {
   const [profile, setProfile] = useState(null);
+  const [isPremium, setIsPremium] = useState(false);
   const [error, setError] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
@@ -30,45 +31,23 @@ const ProfileScreen = ({ navigation }) => {
       if (!userId) {
         throw new Error('User ID not found in storage');
       }
-      const response = await fetch(`http://192.168.1.117:3000/profile?userId=${userId}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const profileResponse = await fetch(`http://192.168.1.7:3000/profile?userId=${userId}`);
+      if (!profileResponse.ok) {
+        throw new Error(`HTTP error! status: ${profileResponse.status}`);
       }
-      const result = await response.json();
-      setProfile(result);
+      const profileResult = await profileResponse.json();
+      setProfile(profileResult);
+
+      const premiumResponse = await fetch(`http://192.168.1.7:3000/check-premium?userId=${userId}`);
+      if (!premiumResponse.ok) {
+        throw new Error(`HTTP error! status: ${premiumResponse.status}`);
+      }
+      const premiumResult = await premiumResponse.json();
+      setIsPremium(premiumResult.premium);
     } catch (error) {
       console.error('Error fetching profile:', error);
       setError(error.toString());
       Alert.alert('Error', error.toString());
-    }
-  };
-
-  const handlePurchase = async () => {
-    const paymentData = {
-      action: 'pay',
-      amount: '10',
-      currency: 'USD',
-      description: 'Преміум акаунт',
-      order_id: 'order_id_1',
-      version: '3',
-    };
-    try {
-      const response = await fetch('https://your-server.com/payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentData),
-      });
-      const result = await response.json();
-      if (result.success) {
-        // Open the payment form URL in the browser
-        Linking.openURL(result.payment_url);
-      } else {
-        console.error('Payment failed:', result.error);
-      }
-    } catch (error) {
-      console.error('Error processing payment:', error);
     }
   };
 
@@ -114,7 +93,7 @@ const ProfileScreen = ({ navigation }) => {
             source={avatarPath}
             style={styles.profileImage}
           />
-          <Text style={styles.profileName}>{profile.username}</Text>
+          <Text style={[styles.profileName, isPremium && styles.premiumName]}>{profile.username}</Text>
         </View>
         <View style={styles.statsContainer}>
           <View style={styles.stat}>
@@ -158,12 +137,14 @@ const ProfileScreen = ({ navigation }) => {
             style={styles.arrowIcon}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.premiumButton} onPress={() => setIsBankModalVisible(true)}>
-          <Image
-            source={require('../assets/BuyPremiumButton.png')}
-            style={styles.premiumButtonImage}
-          />
-        </TouchableOpacity>
+        {!isPremium && (
+          <TouchableOpacity style={styles.premiumButton} onPress={() => setIsBankModalVisible(true)}>
+            <Image
+              source={require('../assets/BuyPremiumButton.png')}
+              style={styles.premiumButtonImage}
+            />
+          </TouchableOpacity>
+        )}
       </ScrollView>
       <ProfileSettingsModal
         visible={isModalVisible}
@@ -248,6 +229,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+  },
+  premiumName: {
+    color: '#FC3636',
   },
   statsContainer: {
     flexDirection: 'row',
