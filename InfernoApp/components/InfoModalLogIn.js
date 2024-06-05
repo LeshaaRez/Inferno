@@ -7,21 +7,22 @@ import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import CustomAlert from './CustomAlert';
 
 WebBrowser.maybeCompleteAuthSession();
 
-const InfoModalLogIn = ({ visible, onClose }) => {
+const InfoModalLogIn = ({ visible, onClose, onSignUp }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState({});
-
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const navigation = useNavigation();
 
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
         clientId: '274956882933-mlfraac6hed4vsn4pitt3vpndkd80k5p.apps.googleusercontent.com',
         redirectUri: 'com.inferno.infernoapp:/oauthredirect'
-
     });
 
     React.useEffect(() => {
@@ -38,18 +39,19 @@ const InfoModalLogIn = ({ visible, onClose }) => {
 
     const handleGoogleLogin = async (idToken) => {
         try {
-            const response = await axios.post('http://192.168.1.117:3000/google-login', { idToken });
+            const response = await axios.post('http://YOUR_LOCAL_IP:3000/google-login', { idToken });
 
             if (response.data.success) {
                 await AsyncStorage.setItem('userId', response.data.userId.toString());
-                Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
-                onClose();
+                setAlertMessage('Login Successful');
+                setAlertVisible(true);
             } else {
-                Alert.alert('Login Failed', 'Google login failed.');
+                setAlertMessage('Login Failed');
+                setAlertVisible(true);
             }
         } catch (error) {
-            console.error('Google login error:', error.response ? error.response.data : error.message);
-            Alert.alert('Login Error', error.response ? error.response.data.message : 'An error occurred during Google login. Please try again.');
+            setAlertMessage('Login Error');
+            setAlertVisible(true);
         }
     };
 
@@ -64,19 +66,25 @@ const InfoModalLogIn = ({ visible, onClose }) => {
             return;
         }
         try {
-            const response = await axios.post('http://192.168.1.117:3000/login', { email, password });
+            const response = await axios.post('http://YOUR_LOCAL_IP:3000/login', { email, password });
 
             if (response.data.success) {
                 await AsyncStorage.setItem('userId', response.data.userId.toString());
-                Alert.alert('Login Successful', 'You have logged in successfully!', [{ text: 'OK', onPress: () => navigation.navigate('MainScreen') }]);
-                onClose();
+                setAlertMessage('Login Successful');
+                setAlertVisible(true);
             } else {
-                Alert.alert('Login Failed', 'Invalid email or password.');
+                setAlertMessage('Login Failed');
+                setAlertVisible(true);
             }
         } catch (error) {
-            console.error('Login error:', error.response ? error.response.data : error.message);
-            Alert.alert('Login Error', error.response ? error.response.data.message : 'An error occurred during login. Please try again.');
+            setAlertMessage('Login Error');
+            setAlertVisible(true);
         }
+    };
+
+    const handleFacebookLogin = () => {
+        setAlertMessage('Нажаль, дана функція не доступна, але ми працюємо на цим');
+        setAlertVisible(true);
     };
 
     return (
@@ -142,20 +150,25 @@ const InfoModalLogIn = ({ visible, onClose }) => {
                                 style={styles.socialIcon}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={handleFacebookLogin}>
                             <Image
                                 source={require('../assets/networks_logo/facebook.jpg')}
                                 style={styles.socialIcon}
                             />
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={onSignUp}>
                         <Text style={styles.registerText}>
                             Не маєте акаунту? <Text style={styles.registerLink}>Зареєструйтесь</Text>
                         </Text>
                     </TouchableOpacity>
                 </View>
             </TouchableOpacity>
+            <CustomAlert
+                visible={alertVisible}
+                onClose={() => setAlertVisible(false)}
+                message={alertMessage}
+            />
         </Modal>
     );
 };

@@ -2,18 +2,21 @@ import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal, ScrollView, Alert } from 'react-native';
 import axios from 'axios';
 import CustomButton from './CustomButton';
-import { useNavigation } from '@react-navigation/native'; // Импортируем useNavigation
-import Icon from 'react-native-vector-icons/MaterialIcons'; // Импортируем иконки
+import CustomAlert from './CustomAlert'; // Import the custom alert
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import Icon from 'react-native-vector-icons/MaterialIcons'; // Import icons
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const InfomodelSignUp = ({ visible, onClose }) => {
+const InfomodelSignUp = ({ visible, onClose, onSignIn }) => {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [greeting, setGreeting] = useState('');
     const [errors, setErrors] = useState({});
-    const [isPasswordVisible, setIsPasswordVisible] = useState(false); // Состояние для видимости пароля
-    const navigation = useNavigation(); // Используем useNavigation для получения навигации
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false); // State for password visibility
+    const [alertVisible, setAlertVisible] = useState(false); // Alert visibility state
+    const [alertMessage, setAlertMessage] = useState(''); // Alert message state
+    const navigation = useNavigation(); // Use useNavigation for navigation
 
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -32,7 +35,7 @@ const InfomodelSignUp = ({ visible, onClose }) => {
             return;
         }
         try {
-            const response = await axios.post('http://192.168.1.117:3000/signup', { // Замените на ваш фактический IP-адрес
+            const response = await axios.post('http://YOUR_LOCAL_IP:3000/signup', { // Replace with your actual IP address
                 fullName,
                 email,
                 password,
@@ -42,13 +45,15 @@ const InfomodelSignUp = ({ visible, onClose }) => {
                 await AsyncStorage.setItem('userId', response.data.userId.toString());
                 setGreeting(`Hi, ${fullName}`);
                 onClose();
-                navigation.navigate('MainScreen'); // Переход на главную страницу
+                navigation.navigate('MainScreen'); // Navigate to the main screen
             } else {
-                Alert.alert('Registration Failed', 'An error occurred during registration.');
+                setAlertMessage('Registration Failed', 'An error occurred during registration.');
+                setAlertVisible(true);
             }
         } catch (error) {
             console.error(error);
-            Alert.alert('Registration Error', error.message);
+            setAlertMessage('Registration Error', error.message);
+            setAlertVisible(true);
         }
     };
 
@@ -120,14 +125,16 @@ const InfomodelSignUp = ({ visible, onClose }) => {
                                             style={styles.socialIcon}
                                         />
                                     </TouchableOpacity>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => Alert.alert('Feature Unavailable', 'Нажаль, дана функкция не доступна, але ми працюємо на цим')}
+                                    >
                                         <Image
                                             source={require('../assets/networks_logo/facebook.jpg')}
                                             style={styles.socialIcon}
                                         />
                                     </TouchableOpacity>
                                 </View>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={onSignIn}>
                                     <Text style={styles.registerText}>
                                         Вже маєте акаунт? <Text style={styles.registerLink}>Увійдіть</Text>
                                     </Text>
@@ -135,6 +142,11 @@ const InfomodelSignUp = ({ visible, onClose }) => {
                             </View>
                         )}
                     </ScrollView>
+                    <CustomAlert
+                        visible={alertVisible}
+                        onClose={() => setAlertVisible(false)}
+                        message={alertMessage}
+                    />
                 </View>
             </TouchableOpacity>
         </Modal>
@@ -161,16 +173,16 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         width: '95%',
-        alignItems: 'center', // Централизует элементы внутри
+        alignItems: 'center', // Center elements inside
     },
     input: {
         height: 50,
         borderRadius: 20,
         paddingHorizontal: 20,
-        marginBottom: 5, // Уменьшенный отступ
+        marginBottom: 5, // Reduced margin
         backgroundColor: '#FFDDC9',
         fontSize: 16,
-        width: '100%', // Устанавливает ширину инпута в 100% от родительского элемента
+        width: '100%', // Set input width to 100% of parent element
     },
     passwordContainer: {
         flexDirection: 'row',
@@ -194,17 +206,17 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: 'red',
-        marginBottom: 15, // Уменьшенный отступ
+        marginBottom: 15, // Reduced margin
     },
     orText: {
         marginTop: 20,
         fontSize: 16,
         color: '#FFA07A',
-        textAlign: 'center', // Централизует текст
+        textAlign: 'center', // Center text
     },
     socialContainer: {
         flexDirection: 'row',
-        justifyContent: 'center', // Централизует значки по горизонтали
+        justifyContent: 'center', // Center icons horizontally
         marginTop: 20,
     },
     socialIcon: {
@@ -215,7 +227,7 @@ const styles = StyleSheet.create({
     registerText: {
         marginTop: 20,
         fontSize: 16,
-        textAlign: 'center', // Централизует текст
+        textAlign: 'center', // Center text
     },
     registerLink: {
         color: '#FF8845',
@@ -225,7 +237,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#FF8845',
         marginVertical: 20,
-        textAlign: 'center', // Централизует текст
+        textAlign: 'center', // Center text
     },
 });
 
