@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, Image, TouchableOpacity, Button } from 'react-native';
+import { View, Text, StyleSheet, Modal, Image, TouchableOpacity, Button, handleClose } from 'react-native';
 import axios from 'axios';
 import highScoreImage from '../assets/happy.jpg';  // Correct path
 import lowScoreImage from '../assets/sad.jpg';    // Correct path
@@ -10,7 +10,7 @@ const QuizScreenModal = ({ isVisible, onModalClose, score, quizId, userId, navig
     const handleQuizFinish = async () => {
         console.log('Sending data to server:', { userId, quizId, score, rating }); // Log data to debug
         try {
-            const response = await axios.post('http://192.168.1.117:3000/save_result', {
+            const response = await axios.post('http://192.168.1.7:3000/save_result', {
                 userId,
                 quizId,
                 score,
@@ -31,6 +31,11 @@ const QuizScreenModal = ({ isVisible, onModalClose, score, quizId, userId, navig
     const resultText = isHighScore ? 'Молодець!' : 'Можна краще';
     const resultImage = isHighScore ? highScoreImage : lowScoreImage;
 
+    const handleClose = () => {
+        onModalClose();
+        navigation.navigate('MainScreen'); // Navigate to MainScreen
+    };
+
     return (
         <Modal
             animationType="slide"
@@ -38,18 +43,14 @@ const QuizScreenModal = ({ isVisible, onModalClose, score, quizId, userId, navig
             visible={isVisible}
             
         >
-            <TouchableOpacity style={styles.modalContainer}  activeOpacity={1}>
+           <TouchableOpacity style={styles.modalContainer} activeOpacity={1}>
                 <View style={styles.modalContent}>
                     <Image source={resultImage} style={styles.resultImage} />
                     <Text style={styles.resultText}>{`${Math.round(score)}% ${resultText}`}</Text>
-                    <TouchableOpacity style={styles.startButton}
-                            onPress={handleQuizFinish}
-                            
-                            >
-                                <Image source={require('../assets/but.jpg')} style={styles.buttonImage} />
-                                
-                                <Text style={styles.buttonText}></Text>
-                            </TouchableOpacity>
+                    <TouchableOpacity style={styles.startButton} onPress={handleClose}>
+                        <Image source={require('../assets/but.jpg')} style={styles.buttonImage} />
+                        <Text style={styles.buttonText}></Text>
+                    </TouchableOpacity>
                     <Text style={styles.ratingText}>Оцініть пройдену вікторину:</Text>
                     <View style={styles.ratingContainer}>
                         {[1, 2, 3, 4, 5].map(star => (
@@ -58,7 +59,10 @@ const QuizScreenModal = ({ isVisible, onModalClose, score, quizId, userId, navig
                             </TouchableOpacity>
                         ))}
                     </View>
-                    <Text style={styles.sofiia} >Крім того, ви можете завітати на наш сайт та прочитати про дану тему: <Text style={styles.link}>inferno.com</Text></Text>
+                    <Text style={styles.sofiia}>
+                        Крім того, ви можете завітати на наш сайт та прочитати про дану тему:
+                        <Text style={styles.link}>inferno.com</Text>
+                    </Text>
                 </View>
             </TouchableOpacity>
         </Modal>
