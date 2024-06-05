@@ -75,7 +75,7 @@ const ProfileSettingsModal = ({ visible, onClose, profile, onProfileUpdated }) =
                 return;
             }
 
-            const response = await axios.post('http://192.168.31.222:3000/update-profile', {
+            const response = await axios.post('http://192.168.1.117:3000/update-profile', {
                 fullName,
                 email,
                 password,

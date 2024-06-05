@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, Image, Modal, TouchableOpacity, ScrollView } from 'react-native';
 
-const InfoModalFilter = ({ visible, onClose }) => {
+const InfoModalFilter = ({ visible, onClose, onApply }) => {
     const [selectedTopics, setSelectedTopics] = useState([]);
     const [selectedRatings, setSelectedRatings] = useState([]);
     const [selectedDifficulties, setSelectedDifficulties] = useState([]);
@@ -18,6 +18,11 @@ const InfoModalFilter = ({ visible, onClose }) => {
         easy: require('../assets/icons/easy.png'),
         medium: require('../assets/icons/midle.png'),
         hard: require('../assets/icons/hard.png'),
+    };
+
+    const applyFilters = () => {
+        onApply({ topics: selectedTopics, ratings: selectedRatings, difficulties: selectedDifficulties });
+        onClose();
     };
 
     return (
@@ -85,7 +90,7 @@ const InfoModalFilter = ({ visible, onClose }) => {
                             ))}
                         </View>
 
-                        <TouchableOpacity style={styles.applyButton} onPress={onClose}>
+                        <TouchableOpacity style={styles.applyButton} onPress={applyFilters}>
                             <Text style={styles.applyButtonText}>Застосувати</Text>
                         </TouchableOpacity>
                     </ScrollView>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, Image, ScrollView } from 'react-native';
 import axios from 'axios';
 
-const InfoModalQuizInfo = ({ visible, quizId, onClose }) => {
+const InfoModalQuizInfo = ({ visible, quizId, onClose, navigation}) => {
     const [quizInfo, setQuizInfo] = useState(null);
 
     useEffect(() => {
@@ -14,7 +14,7 @@ const InfoModalQuizInfo = ({ visible, quizId, onClose }) => {
 
     const fetchQuizInfo = async (id) => {
         try {
-            const response = await axios.get(`http://192.168.1.7:3000/quiz_info/${id}`);
+            const response = await axios.get(`http://192.168.1.117:3000/quiz_info/${id}`);
             setQuizInfo(response.data);
         } catch (error) {
             console.error('Error fetching quiz info:', error);
@@ -59,8 +59,15 @@ const InfoModalQuizInfo = ({ visible, quizId, onClose }) => {
                             <Text style={styles.modalSubtitle}>by Inferno</Text>
                             <View style={styles.ratingContainer}>{renderRating()}</View>
                             <Text style={styles.modalText}>{quizInfo.description}</Text>
-                            <TouchableOpacity style={styles.startButton}>
+                            <TouchableOpacity style={styles.startButton}
+                            onPress={() => {
+                                onClose(); 
+                                    navigation.navigate('QuizScreen', { quizId });
+                                 }}
+                            
+                            >
                                 <Image source={require('../assets/button.png')} style={styles.buttonImage} />
+                                
                                 <Text style={styles.buttonText}>Почати</Text>
                             </TouchableOpacity>
                             <Text style={styles.footerText}>
