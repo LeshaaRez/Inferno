@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Modal, TouchableOpacity, Switch, Alert } from 'react-native';
+import { StyleSheet, View, Text, Modal, TouchableOpacity, Switch, Image, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const InfoModal = ({ visible, onClose }) => {
@@ -80,7 +80,10 @@ const InfoModal = ({ visible, onClose }) => {
                     </View>
 
                     <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                        <Text style={styles.logoutButtonText}>Вийти з аккаунта</Text>
+                        <Image
+                            source={require('../assets/buttonExit.png')}
+                            style={styles.logoutButtonImage}
+                        />
                     </TouchableOpacity>
                 </TouchableOpacity>
             </TouchableOpacity>
@@ -123,10 +126,6 @@ const styles = StyleSheet.create({
         color: 'black',
     },
     logoutButton: {
-        backgroundColor: '#FFA500', // Match the button color from the image
-        borderRadius: 30,
-        paddingVertical: 15,
-        paddingHorizontal: 30,
         alignItems: 'center',
         marginTop: 20,
         alignSelf: 'center',
@@ -134,9 +133,10 @@ const styles = StyleSheet.create({
         bottom: 25,
         width: '90%',
     },
-    logoutButtonText: {
-        color: 'white',
-        fontSize: 18,
+    logoutButtonImage: {
+        width: '100%',
+        height: 50, // Adjust the height as needed
+        resizeMode: 'contain',
     },
 });
 
