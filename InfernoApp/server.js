@@ -162,7 +162,7 @@ app.get('/quizzes', (req, res) => {
 
 
 app.get('/quiz', (req, res) => {
-    const query = 'SELECT quiz_id, title, image_url, currency_amount AS rating FROM quiz LIMIT 5';
+    const query = 'SELECT quiz_id, title, image_url, currency_amount AS rating FROM quiz';
     db.query(query, async (err, results) => {
         if (err) {
             console.error('Error executing query:', err.stack);
@@ -360,14 +360,36 @@ app.get('/my-quizzes', async (req, res) => {
         }
         res.json(results);
     });
+}); 
+
+app.get('/check-premium', (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) {
+        return res.status(400).send({ error: 'User ID is required' });
+    }
+
+    const query = 'SELECT premium_status FROM profile WHERE user_id = ?';
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+        if (results.length > 0) {
+            res.send({ premium: results[0].premium_status === 1 });
+        } else {
+            res.status(404).send({ error: 'Profile not found' });
+        }
+    });
 });
+
 
 app.post('/create-quiz', async (req, res) => {
     const { title, theme, description, image_url, questions } = req.body;
 
     try {
         // Сначала создаем викторину
-        const quizQuery = 'INSERT INTO quiz (title, theme,image_url,description,) VALUES (?, ?, ?, ?)';
+        const quizQuery = 'INSERT INTO quiz (title,description, theme,image_url, difficulty, currency_amount, background_image_url) VALUES (?, ?, ?, ?, "medium", "3", "egwg")';
         db.query(quizQuery, [title, theme, description, image_url], (err, result) => {
             if (err) {
                 console.error('Error executing quiz query:', err.stack);
