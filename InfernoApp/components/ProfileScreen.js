@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native'; // Импортируем хук useFocusEffect
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect hook
 import ProfileSettingsModal from './ProfileSettingsModal';
 import InfoModalHelp from './InfoModalHelp';
 import ProfileMyQuizzes from './ProfileMyQuizzes';
@@ -14,7 +14,7 @@ const avatarImages = {
   'avatar4.png': require('../assets/profile/profileAvatar/photo4.png'),
 };
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }) => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -64,7 +64,7 @@ const ProfileScreen = () => {
     >
       <ScrollView contentContainerStyle={styles.profileContainer}>
         <View style={styles.headerContainer}>
-          <TouchableOpacity style={styles.backButton}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Image
               source={require('../assets/icons/back.png')}
               style={styles.backIcon}
@@ -87,22 +87,26 @@ const ProfileScreen = () => {
         </View>
         <View style={styles.statsContainer}>
           <View style={styles.stat}>
-            <Text style={styles.statNumber}>{profile.achievementsCount}</Text>
-            <Text style={styles.statLabel}>досягнень</Text>
+            <View style={styles.statBox}>
+              <Text style={styles.statNumber}>{profile.achievementsCount}</Text>
+              <Text style={styles.statLabel}>досягнень</Text>
+            </View>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statNumber}>{profile.quizzesCount}</Text>
-            <Text style={styles.statLabel}>вікторин</Text>
+            <View style={styles.statBox}>
+              <Text style={styles.statNumber}>{profile.quizzesCount}</Text>
+              <Text style={styles.statLabel}>вікторин</Text>
+            </View>
           </View>
         </View>
         <TouchableOpacity style={styles.menuItem} onPress={() => setIsQuizzeModalVisible(true)}>
-          <Text style={styles.menuItemText}>Мої вікторини </Text>
+          <Text style={styles.menuItemText}>Мої вікторини</Text>
           <Image
             source={require('../assets/icons/arrow.png')}
             style={styles.arrowIcon}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Achievements')}>
           <Text style={styles.menuItemText}>Досягнення</Text>
           <Image
             source={require('../assets/icons/arrow.png')}
@@ -110,7 +114,7 @@ const ProfileScreen = () => {
           />
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={() => setIsSettingsModalVisible(true)}>
-          <Text style={styles.menuItemText}>Налаштування </Text>
+          <Text style={styles.menuItemText}>Налаштування</Text>
           <Image
             source={require('../assets/icons/arrow.png')}
             style={styles.arrowIcon}
@@ -162,6 +166,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     flexGrow: 1,
+    marginTop: 5,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -213,9 +218,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
     marginVertical: 20,
+    marginTop: 1,
+    marginBottom: 20,
   },
   stat: {
     alignItems: 'center',
+    padding: 10,
+  },
+  statBox: {
+    borderWidth: 2,
+    borderColor: 'white',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  statBox: {
+    borderWidth: 1,
+    borderColor: 'white',
+    borderRadius: 10,
+    padding: 10,
+    alignItems: 'center',
+    width: 110,
   },
   statNumber: {
     fontSize: 24,

@@ -11,15 +11,20 @@ const ProfileSettingsModal = ({ visible, onClose, profile, onProfileUpdated }) =
         { source: require('../assets/profile/profileAvatar/photo4.png'), path: 'avatar4.png' },
     ];
 
-    const [fullName, setFullName] = useState(profile?.username || '');
-    const [email, setEmail] = useState(profile?.email || '');
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [profileImage, setProfileImage] = useState(images[0].source); // Default image
     const [profileImagePath, setProfileImagePath] = useState('avatar1.png');
     const [imagePickerVisible, setImagePickerVisible] = useState(false);
+    const [errorMessage, setErrorMessage] = useState({ fullName: '', email: '', password: '' });
 
     useEffect(() => {
         if (profile) {
+            setFullName(profile.username || '');
+            setEmail(profile.email || '');
+            setPassword(profile.password || '');
+
             const currentImage = images.find(image => image.path === profile.avatar);
             if (currentImage) {
                 setProfileImage(currentImage.source);
@@ -34,7 +39,35 @@ const ProfileSettingsModal = ({ visible, onClose, profile, onProfileUpdated }) =
         setImagePickerVisible(false);
     };
 
+    const validateEmail = (email) => {
+        const re = /\S+@\S+\.\S+/;
+        return re.test(email);
+    };
+
     const handleSave = async () => {
+        let valid = true;
+        let errors = { fullName: '', email: '', password: '' };
+
+        if (!fullName) {
+            errors.fullName = 'Поле ім\'я не може бути порожнім';
+            valid = false;
+        }
+        if (!email) {
+            errors.email = 'Поле ел. пошти не може бути порожнім';
+            valid = false;
+        } else if (!validateEmail(email)) {
+            errors.email = 'Введіть коректну адресу ел. пошти';
+            valid = false;
+        }
+        if (!password) {
+            errors.password = 'Поле пароля не може бути порожнім';
+            valid = false;
+        }
+
+        setErrorMessage(errors);
+
+        if (!valid) return;
+
         try {
             const userId = await AsyncStorage.getItem('userId');
             if (!userId) {
@@ -89,6 +122,7 @@ const ProfileSettingsModal = ({ visible, onClose, profile, onProfileUpdated }) =
                             value={fullName}
                             onChangeText={setFullName}
                         />
+                        {errorMessage.fullName ? <Text style={styles.errorText}>{errorMessage.fullName}</Text> : null}
                     </View>
                     <View style={styles.inputContainer}>
                         <Text style={styles.inputLabel}>Адреса ел. пошти</Text>
@@ -98,6 +132,7 @@ const ProfileSettingsModal = ({ visible, onClose, profile, onProfileUpdated }) =
                             value={email}
                             onChangeText={setEmail}
                         />
+                        {errorMessage.email ? <Text style={styles.errorText}>{errorMessage.email}</Text> : null}
                     </View>
                     <View style={styles.inputContainer}>
                         <Text style={styles.inputLabel}>Пароль</Text>
@@ -108,6 +143,7 @@ const ProfileSettingsModal = ({ visible, onClose, profile, onProfileUpdated }) =
                             onChangeText={setPassword}
                             secureTextEntry
                         />
+                        {errorMessage.password ? <Text style={styles.errorText}>{errorMessage.password}</Text> : null}
                     </View>
                     <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                         <Text style={styles.saveButtonText}>Підтвердити</Text>
@@ -132,7 +168,6 @@ const ProfileSettingsModal = ({ visible, onClose, profile, onProfileUpdated }) =
                         keyExtractor={(item, index) => index.toString()}
                         numColumns={2}
                         columnWrapperStyle={styles.row}
-                        key={(imagePickerVisible ? 'picker' : 'list') + (images.length)}
                     />
                 </View>
             </Modal>
@@ -208,6 +243,12 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         paddingHorizontal: 20,
         backgroundColor: '#FFDDC9',
+    },
+    errorText: {
+        color: 'red',
+        marginLeft: 5,
+        marginTop: 5,
+        fontSize: 12,
     },
     saveButton: {
         alignItems: 'center',

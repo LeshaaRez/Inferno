@@ -5,7 +5,7 @@ import InfoModalFilter from './InfoModalFilter';
 import InfoModalQuizInfo from './InfoModalQuizInfo';
 import axios from 'axios';
 
-const MainScreen = ({ navigation }) => {
+const MainScreen = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [topQuizzes, setTopQuizzes] = useState([]);
     const [bottomQuizzes, setBottomQuizzes] = useState([]);
@@ -14,6 +14,8 @@ const MainScreen = ({ navigation }) => {
     const [searchText, setSearchText] = useState('');
     const [filteredQuizzes, setFilteredQuizzes] = useState([]);
     const [selectedQuizId, setSelectedQuizId] = useState(null);
+    const [selectedFilters, setSelectedFilters] = useState({ topics: [], ratings: [], difficulties: [] });
+    const [filtersApplied, setFiltersApplied] = useState(false);
 
     useEffect(() => {
         fetchTopQuizzes();
@@ -31,9 +33,13 @@ const MainScreen = ({ navigation }) => {
         }
     }, [topQuizzes]);
 
+    useEffect(() => {
+        applyFilters();
+    }, [selectedFilters]);
+
     const fetchTopQuizzes = async () => {
         try {
-            const response = await axios.get('http://192.168.1.117:3000/quizzes');
+            const response = await axios.get('http://192.168.31.222:3000/quizzes');
             setTopQuizzes(response.data);
         } catch (error) {
             console.error('Error fetching top quizzes:', error);
@@ -42,8 +48,9 @@ const MainScreen = ({ navigation }) => {
 
     const fetchBottomQuizzes = async () => {
         try {
-            const response = await axios.get('http://192.168.1.117:3000/quiz');
+            const response = await axios.get('http://192.168.31.222:3000/quiz');
             setBottomQuizzes(response.data);
+            setFilteredQuizzes(response.data); // Изначально показываем все викторины
             console.log(response.data); // Логирование данных викторины
         } catch (error) {
             console.error('Error fetching bottom quizzes:', error);
@@ -55,7 +62,6 @@ const MainScreen = ({ navigation }) => {
             const storedQuizId = await AsyncStorage.getItem('selectedQuizId');
             if (storedQuizId !== null) {
                 setSelectedQuizId(storedQuizId);
-                setQuizInfoModalVisible(true);
             }
         } catch (error) {
             console.error('Error getting stored quiz ID:', error);
@@ -78,7 +84,7 @@ const MainScreen = ({ navigation }) => {
             );
             setFilteredQuizzes(filtered);
         } else {
-            setFilteredQuizzes([]);
+            applyFilters();
         }
     };
 
@@ -94,6 +100,31 @@ const MainScreen = ({ navigation }) => {
             setQuizInfoModalVisible(true);
         } else {
             console.error('Quiz ID is undefined');
+        }
+    };
+
+    const applyFilters = async () => {
+        const { topics, ratings, difficulties } = selectedFilters;
+
+        const filtersApplied = topics.length > 0 || ratings.length > 0 || difficulties.length > 0;
+        setFiltersApplied(filtersApplied);
+
+        if (!filtersApplied) {
+            setFilteredQuizzes(bottomQuizzes); // Показываем все викторины, если фильтры не выбраны
+            return;
+        }
+
+        try {
+            const response = await axios.get('http://192.168.31.222:3000/filtered-quizzes', {
+                params: {
+                    topics: topics.join(','),
+                    ratings: ratings.join(','),
+                    difficulties: difficulties.join(','),
+                },
+            });
+            setFilteredQuizzes(response.data);
+        } catch (error) {
+            console.error('Error applying filters:', error);
         }
     };
 
@@ -147,9 +178,13 @@ const MainScreen = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                {searchText ? (
+                {searchText || filtersApplied ? (
                     <ScrollView contentContainerStyle={styles.quizzesContainer}>
-                        {renderQuizzes(filteredQuizzes)}
+                        {filteredQuizzes.length > 0 ? (
+                            renderQuizzes(filteredQuizzes)
+                        ) : (
+                            <Text style={styles.noResultsText}>За обраними критеріями результати відсутні.</Text>
+                        )}
                     </ScrollView>
                 ) : (
                     <>
@@ -180,17 +215,20 @@ const MainScreen = ({ navigation }) => {
                         </View>
                         <Text style={styles.specialText}>Спеціально для вас:</Text>
                         <ScrollView contentContainerStyle={styles.quizzesContainer}>
-                            {renderQuizzes(bottomQuizzes)}
+                            {renderQuizzes(filteredQuizzes)}
                         </ScrollView>
                     </>
                 )}
             </ImageBackground>
-            <InfoModalFilter visible={filterModalVisible} onClose={() => setFilterModalVisible(false)} />
+            <InfoModalFilter
+                visible={filterModalVisible}
+                onClose={() => setFilterModalVisible(false)}
+                onApply={setSelectedFilters}
+            />
             <InfoModalQuizInfo 
                 visible={quizInfoModalVisible} 
                 quizId={selectedQuizId} 
                 onClose={() => setQuizInfoModalVisible(false)} 
-                navigation={navigation}
             />
         </View>
     );
@@ -290,7 +328,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     quizItem: {
-        width: '100%',
+        width: 380,
         height: 100,
         borderRadius: 15,
         overflow: 'hidden',
@@ -321,6 +359,12 @@ const styles = StyleSheet.create({
     quizItemRatingIcon: {
         width: 20,
         height: 24,
+    },
+    noResultsText: {
+        fontSize: 18,
+        color: 'white',
+        textAlign: 'center',
+        marginTop: 20,
     },
 });
 

@@ -187,7 +187,7 @@ app.get('/quiz', (req, res) => {
 
 app.get('/quiz_info/:id', (req, res) => {
     const quizId = req.params.id;
-    const query = 'SELECT quiz_id, title, image_url, description FROM quiz WHERE quiz_id = ?';
+    const query = 'SELECT quiz_id, title, image_url, description, currency_amount FROM quiz WHERE quiz_id = ?';
 
     db.query(query, [quizId], async (err, results) => {
         if (err) {
@@ -298,44 +298,114 @@ app.post('/update-profile', (req, res) => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
-
-
-app.get('/quiz_questions/:quizId', async (req, res) => {
-    const { quizId } = req.params;
+app.get('/my-quizzes', async (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) {
+      return res.status(400).send({ error: 'User ID is required' });
+    }
+  
     const query = `
-        SELECT q.*, quiz.background_image_url 
-        FROM question q 
-        JOIN quiz ON q.quiz_id = quiz.quiz_id 
-        WHERE q.quiz_id = ?;
+      SELECT q.quiz_id, q.title, q.image_url, r.score, 
+             (SELECT COUNT(*) FROM question WHERE quiz_id = q.quiz_id) AS totalQuestions
+      FROM result r
+      JOIN quiz q ON r.quiz_id = q.quiz_id
+      WHERE r.user_id = ?
+    `;
+  
+    db.query(query, [userId], async (err, results) => {
+      if (err) {
+        console.error('Error executing query:', err.stack);
+        res.status(500).send({ error: 'Database query failed' });
+        return;
+      }
+  
+      // Преобразование gs:// ссылок в HTTP ссылки
+      const quizzesWithUrls = await Promise.all(results.map(async quiz => {
+        if (quiz.image_url.startsWith('gs://')) {
+          const filePath = quiz.image_url.replace('gs://inferno-1a6a8.appspot.com/', '');
+          const [file] = await bucket.file(filePath).getSignedUrl({
+            action: 'read',
+            expires: '03-09-2491'
+          });
+          quiz.image_url = file;
+        }
+        return quiz;
+      }));
+  
+      res.json(quizzesWithUrls);
+    });
+  });
+  
+  app.get('/achievements', (req, res) => {
+    const userId = req.query.userId;
+    if (!userId) {
+        return res.status(400).send({ error: 'User ID is required' });
+    }
+
+    const achievementsQuery = `
+        SELECT 
+            a.achieve_id,
+            a.name,
+            a.description,
+            IF(ua.user_id IS NULL, 0, 1) AS achieved
+        FROM achieve a
+        LEFT JOIN userachieve ua ON a.achieve_id = ua.achieve_id AND ua.user_id = ?
     `;
 
-    db.query(query, [quizId], async (err, results) => {
+    db.query(achievementsQuery, [userId], (err, results) => {
         if (err) {
-            console.error('Error fetching questions:', err);
-            res.status(500).send({ error: 'Database query failed', details: err.message });
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
             return;
         }
-
-        if (results.length > 0) {
-            const updatedResults = await Promise.all(results.map(async question => {
-                if (question.background_image_url) {
-                    const filePath = question.background_image_url.replace('gs://inferno-1a6a8.appspot.com/', '');
-                    const [fileUrl] = await bucket.file(filePath).getSignedUrl({
-                        action: 'read',
-                        expires: '03-09-2491'
-                    });
-                    return { ...question, background_image_url: fileUrl };
-                } else {
-                    return { ...question, background_image_url: null };
-                }
-            }));
-            res.json(updatedResults);
-        } else {
-            res.status(404).send({ error: 'No questions found for this quiz' });
-        }
+        res.json(results);
     });
 });
 
+app.get('/filtered-quizzes', (req, res) => {
+    const { topics, ratings, difficulties } = req.query;
+
+    let query = 'SELECT * FROM quiz WHERE 1=1';
+    const params = [];
+
+    if (topics) {
+        const topicsArray = topics.split(',');
+        query += ' AND theme IN (?)';
+        params.push(topicsArray);
+    }
+
+    if (ratings) {
+        const ratingsArray = ratings.split(',').map(r => parseInt(r, 10));
+        query += ' AND currency_amount IN (?)';
+        params.push(ratingsArray);
+    }
+
+    if (difficulties) {
+        const difficultiesArray = difficulties.split(',');
+        query += ' AND difficulty IN (?)';
+        params.push(difficultiesArray);
+    }
+
+    db.query(query, params, async (err, results) => {
+        if (err) {
+            console.error('Error executing query:', err.stack);
+            res.status(500).send({ error: 'Database query failed' });
+            return;
+        }
+
+        const quizzesWithUrls = await Promise.all(results.map(async quiz => {
+            const filePath = quiz.image_url.replace('gs://inferno-1a6a8.appspot.com/', '');
+            const [file] = await bucket.file(filePath).getSignedUrl({
+                action: 'read',
+                expires: '03-09-2491'
+            });
+            return { ...quiz, image_url: file };
+        }));
+
+        res.send(quizzesWithUrls);
+    });
+});
+
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
