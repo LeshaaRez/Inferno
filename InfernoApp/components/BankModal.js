@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, Modal, Dimensions, Linking, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, Modal, Dimensions, Linking, TouchableWithoutFeedback, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BankModal = ({ visible, onClose, token }) => {
@@ -24,6 +24,10 @@ const BankModal = ({ visible, onClose, token }) => {
     }, []);
 
     const handlePurchase = async (bank) => {
+            if (bank !== 'monobank') {
+                Alert.alert('Нажаль, дана функція не доступна, але ми працюємо на цим');
+                return;
+            }
         const paymentData = {
             amount: 1000, // Сумма в копейках (10 USD = 1000 копеек)
             currency: 'UAH', // Установите правильную валюту
@@ -121,6 +125,7 @@ const styles = StyleSheet.create({
         width: '80%',
         height: '40%',
         resizeMode: 'contain',
+
     },
     premiumText: {
         fontSize: 24,
@@ -151,7 +156,7 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         resizeMode: 'contain',
-        marginHorizontal: 5,
+        marginHorizontal: 30,
     },
 });
 
