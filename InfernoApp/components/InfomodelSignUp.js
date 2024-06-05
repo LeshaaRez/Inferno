@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native'; // Импортиру�
 import Icon from 'react-native-vector-icons/MaterialIcons'; // Импортируем иконки
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const InfomodelSignUp = ({ visible, onClose }) => {
+const InfomodelSignUp = ({ visible, onClose, onSignIn }) => {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -32,7 +32,7 @@ const InfomodelSignUp = ({ visible, onClose }) => {
             return;
         }
         try {
-            const response = await axios.post('http://192.168.1.117:3000/signup', { // Замените на ваш фактический IP-адрес
+            const response = await axios.post('http://YOUR_LOCAL_IP:3000/signup', { // Замените на ваш фактический IP-адрес
                 fullName,
                 email,
                 password,
@@ -50,6 +50,10 @@ const InfomodelSignUp = ({ visible, onClose }) => {
             console.error(error);
             Alert.alert('Registration Error', error.message);
         }
+    };
+
+    const handleFacebookLogin = () => {
+        Alert.alert('Нажаль, дана функція не доступна, але ми працюємо на цим');
     };
 
     return (
@@ -120,14 +124,14 @@ const InfomodelSignUp = ({ visible, onClose }) => {
                                             style={styles.socialIcon}
                                         />
                                     </TouchableOpacity>
-                                    <TouchableOpacity>
+                                    <TouchableOpacity onPress={handleFacebookLogin}>
                                         <Image
                                             source={require('../assets/networks_logo/facebook.jpg')}
                                             style={styles.socialIcon}
                                         />
                                     </TouchableOpacity>
                                 </View>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={onSignIn}>
                                     <Text style={styles.registerText}>
                                         Вже маєте акаунт? <Text style={styles.registerLink}>Увійдіть</Text>
                                     </Text>

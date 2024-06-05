@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal, Alert } from 'react-native';
+import { StyleSheet, View, TextInput, TouchableOpacity, Text, Image, Modal, Alert, onSignUp } from 'react-native';
 import CustomButton from './CustomButton';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
@@ -38,7 +38,7 @@ const InfoModalLogIn = ({ visible, onClose }) => {
 
     const handleGoogleLogin = async (idToken) => {
         try {
-            const response = await axios.post('http://192.168.1.117:3000/google-login', { idToken });
+            const response = await axios.post('http://192.168.1.7:3000/google-login', { idToken });
 
             if (response.data.success) {
                 await AsyncStorage.setItem('userId', response.data.userId.toString());
@@ -53,6 +53,10 @@ const InfoModalLogIn = ({ visible, onClose }) => {
         }
     };
 
+    const handleFacebookLogin = () => {
+        Alert.alert('Нажаль, дана функція не доступна, але ми працюємо на цим');
+    };
+
     const handleLogin = async () => {
         const newErrors = {};
         if (!email) newErrors.email = true;
@@ -64,7 +68,7 @@ const InfoModalLogIn = ({ visible, onClose }) => {
             return;
         }
         try {
-            const response = await axios.post('http://192.168.1.117:3000/login', { email, password });
+            const response = await axios.post('http://192.168.1.7:3000/login', { email, password });
 
             if (response.data.success) {
                 await AsyncStorage.setItem('userId', response.data.userId.toString());
@@ -142,14 +146,14 @@ const InfoModalLogIn = ({ visible, onClose }) => {
                                 style={styles.socialIcon}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={handleFacebookLogin}>
                             <Image
                                 source={require('../assets/networks_logo/facebook.jpg')}
                                 style={styles.socialIcon}
                             />
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={onSignUp}>
                         <Text style={styles.registerText}>
                             Не маєте акаунту? <Text style={styles.registerLink}>Зареєструйтесь</Text>
                         </Text>

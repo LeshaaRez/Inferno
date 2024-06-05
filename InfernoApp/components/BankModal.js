@@ -1,7 +1,36 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, Modal, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, Modal, Dimensions, Linking, TouchableWithoutFeedback } from 'react-native';
 
-const BankModal = ({ visible, onClose, handlePurchase }) => {
+const BankModal = ({ visible, onClose, token }) => {
+    const handlePurchase = async (bank) => {
+        const paymentData = {
+            amount: 1000, // Сумма в копейках (10 USD = 1000 копеек)
+            currency: 'UAH', // Установите правильную валюту
+            merchantPaymInfo: {
+                reference: 'Преміум акаунт',
+            },
+        };
+        try {
+            const response = await fetch('https://api.monobank.ua/api/merchant/invoice/create', {
+                method: 'POST',
+                headers: {
+                    'X-Token': token,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(paymentData),
+            });
+            const result = await response.json();
+            if (result.pageUrl) {
+                // Open the payment form URL in the browser
+                Linking.openURL(result.pageUrl);
+            } else {
+                console.error('Payment failed:', result.errText);
+            }
+        } catch (error) {
+            console.error('Error processing payment:', error);
+        }
+    };
+
     return (
         <Modal
             animationType="slide"
@@ -9,33 +38,40 @@ const BankModal = ({ visible, onClose, handlePurchase }) => {
             visible={visible}
             onRequestClose={onClose}
         >
-            <TouchableOpacity style={styles.centeredView} onPress={onClose} activeOpacity={1}>
-                <View style={styles.modalView}>
-                    <Image source={require('../assets/bank/moneyfire.png')} style={styles.image} />
-                    <Text style={styles.premiumText}>Преміум акаунт</Text>
-                    <Text style={styles.priceText}>10$</Text>
-                    <Text style={styles.descriptionText}>Він передбачає: необмежену кількість спроб, додаткові підказки, можливість сворювати власні вікторини.</Text>
-                    <Text style={styles.paymentText}>{"\n"}Ви можете оплатити за допомогою:</Text>
-                    <View style={styles.imagesContainer}>
-                        <Image source={require('../assets/bank/monobank.png')} style={styles.paymentImage} />
-                        <Image source={require('../assets/bank/osad.png')} style={styles.paymentImage} />
-                        <Image source={require('../assets/bank/Privat24_Logo.png')} style={styles.paymentImage} />
-                    </View>
-                    <TouchableOpacity style={styles.overlayButton} onPress={handlePurchase}>
-                        <Text style={styles.overlayButtonText}>Купити</Text>
-                    </TouchableOpacity>
+            <TouchableWithoutFeedback onPress={onClose}>
+                <View style={styles.overlay}>
+                    <TouchableWithoutFeedback>
+                        <View style={styles.modalView}>
+                            <Image source={require('../assets/bank/moneyfire.png')} style={styles.image} />
+                            <Text style={styles.premiumText}>Преміум акаунт</Text>
+                            <Text style={styles.priceText}>10$</Text>
+                            <Text style={styles.descriptionText}>Він передбачає: необмежену кількість спроб, додаткові підказки, можливість сворювати власні вікторини.</Text>
+                            <Text style={styles.paymentText}>{"\n"}Ви можете оплатити за допомогою:</Text>
+                            <View style={styles.imagesContainer}>
+                                <TouchableOpacity onPress={() => handlePurchase('monobank')}>
+                                    <Image source={require('../assets/bank/monobank.png')} style={styles.paymentImage} />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => handlePurchase('oschad')}>
+                                    <Image source={require('../assets/bank/osad.png')} style={styles.paymentImage} />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => handlePurchase('privat24')}>
+                                    <Image source={require('../assets/bank/Privat24_Logo.png')} style={styles.paymentImage} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </TouchableWithoutFeedback>
                 </View>
-            </TouchableOpacity>
+            </TouchableWithoutFeedback>
         </Modal>
     );
 };
 
 const styles = StyleSheet.create({
-    centeredView: {
+    overlay: {
         flex: 1,
-        justifyContent: "flex-end",
-        alignItems: "center",
-        marginTop: 22,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalView: {
         width: Dimensions.get('window').width,
@@ -48,7 +84,7 @@ const styles = StyleSheet.create({
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
-            height: 2
+            height: 2,
         },
         shadowOpacity: 0.25,
         shadowRadius: 4,
@@ -85,26 +121,10 @@ const styles = StyleSheet.create({
         marginTop: 30,
     },
     paymentImage: {
-        width: '30%',
-        height: 50,
+        width: 60,
+        height: 60,
         resizeMode: 'contain',
         marginHorizontal: 5,
-    },
-    overlayButton: {
-        position: 'absolute',
-        bottom: 20,
-        backgroundColor: '#FA4D00',
-        borderRadius: 50,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        elevation: 2,
-        width: '100%',
-    },
-    overlayButtonText: {
-        color: "white",
-        fontWeight: "bold",
-        textAlign: "center",
-        fontSize: 18,
     },
 });
 

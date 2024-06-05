@@ -146,7 +146,10 @@ const ProfileSettingsModal = ({ visible, onClose, profile, onProfileUpdated }) =
                         {errorMessage.password ? <Text style={styles.errorText}>{errorMessage.password}</Text> : null}
                     </View>
                     <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                        <Text style={styles.saveButtonText}>Підтвердити</Text>
+                        <Image
+                            source={require('../assets/buttonConfirm.png')}
+                            style={styles.saveButtonImage}
+                        />
                     </TouchableOpacity>
                 </View>
             </TouchableOpacity>
@@ -252,14 +255,16 @@ const styles = StyleSheet.create({
     },
     saveButton: {
         alignItems: 'center',
-        backgroundColor: '#FC9B37',
-        padding: 15,
-        borderRadius: 25,
+        marginTop: 20,
+        alignSelf: 'center',
+        position: 'absolute',
+        bottom: 100,
+        width: '90%',
     },
-    saveButtonText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'bold',
+    saveButtonImage: {
+        width: '100%',
+        height: 50,
+        resizeMode: 'contain',
     },
     imagePickerContainer: {
         flex: 1,

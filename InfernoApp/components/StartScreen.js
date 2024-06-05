@@ -8,6 +8,16 @@ const StartScreen = ({ navigation }) => {
     const [logInModalVisible, setLogInModalVisible] = useState(false);
     const [signUpModalVisible, setSignUpModalVisible] = useState(false);
 
+    const openSignUp = () => {
+        setLogInModalVisible(false);
+        setSignUpModalVisible(true);
+    };
+
+    const openLogIn = () => {
+        setSignUpModalVisible(false);
+        setLogInModalVisible(true);
+    };
+
     return (
         <ImageBackground source={require('../assets/background/Ellipse3.png')} style={styles.container}>
             <View style={styles.header}>
@@ -36,12 +46,14 @@ const StartScreen = ({ navigation }) => {
             <InfoModalLogIn
                 visible={logInModalVisible}
                 onClose={() => setLogInModalVisible(false)}
+                onSignUp={openSignUp}
                 navigation={navigation} // Passing navigation prop
             />
 
             <InfomodelSignUp
                 visible={signUpModalVisible}
                 onClose={() => setSignUpModalVisible(false)}
+                onSignIn={openLogIn}
                 navigation={navigation} // Passing navigation prop
             />
         </ImageBackground>
