@@ -75,7 +75,7 @@ const ShopScreen = () => {
                         <Text style={styles.descriptionText}>Він передбачає: необмежену кількість спроб, додаткові підказки, можливість сворювати власні вікторини.</Text>
                         <Text style={styles.paymentText}>{"\n"}Ви можете оплатити за допомогою:</Text>
                         <View style={styles.imagesContainer}>
-                            <Image source={require('..assets/bank/monobank.png')} style={styles.paymentImage} />
+                            <Image source={require('../assets/bank/monobank.png')} style={styles.paymentImage} />
                             <Image source={require('../assets/bank/osad.png')} style={styles.paymentImage} />
                             <Image source={require('../assets/bank/Privat24_Logo.png')} style={styles.paymentImage} />
                         </View>
