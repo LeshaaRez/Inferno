@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     width: '100%',
     paddingTop: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 1, // Adjusted padding
   },
   backButton: {
     padding: 10,
