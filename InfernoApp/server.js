@@ -362,6 +362,52 @@ app.get('/my-quizzes', async (req, res) => {
     });
 });
 
+app.post('/create-quiz', async (req, res) => {
+    const { title, theme, description, image_url, questions } = req.body;
+
+    try {
+        // Сначала создаем викторину
+        const quizQuery = 'INSERT INTO quiz (title, theme,image_url,description,) VALUES (?, ?, ?, ?)';
+        db.query(quizQuery, [title, theme, description, image_url], (err, result) => {
+            if (err) {
+                console.error('Error executing quiz query:', err.stack);
+                res.status(500).send({ error: 'Database quiz query failed' });
+                return;
+            }
+
+            const quizId = result.insertId;
+
+            // Теперь добавляем вопросы
+            const questionQueries = questions.map(question => {
+                const questionQuery = 'INSERT INTO question (quiz_id, question_text, correct_answer, wrong_answer1, wrong_answer2, wrong_answer3) VALUES (?, ?, ?, ?, ?, ?)';
+                return new Promise((resolve, reject) => {
+                    db.query(questionQuery, [quizId, question.text, question.correctAnswer, ...question.answers], (err) => {
+                        if (err) {
+                            console.error('Error executing question query:', err.stack);
+                            reject('Database question query failed');
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+            });
+
+            Promise.all(questionQueries)
+                .then(() => {
+                    res.send({ message: 'Quiz created successfully' });
+                })
+                .catch(error => {
+                    console.error(error);
+                    res.status(500).send({ error });
+                });
+        });
+    } catch (error) {
+        console.error('Error creating quiz:', error);
+        res.status(500).send({ error: 'Server error' });
+    }
+});
+
+
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
