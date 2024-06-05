@@ -53,7 +53,7 @@ const InfoModalFilter = ({ visible, onClose, onApply }) => {
                                 ))}
                             </View>
                             <View style={styles.checkboxColumn}>
-                                {['Техніка', 'Наука', 'Спорт'].map((topic) => (
+                                {['Техніка', 'Наука', 'Спорт', 'космос'].map((topic) => (
                                     <View key={topic} style={styles.checkboxContainer}>
                                         <TouchableOpacity onPress={() => toggleSelection(selectedTopics, setSelectedTopics, topic)}>
                                             <Image source={selectedTopics.includes(topic) ? require('../assets/icons/checked.png') : require('../assets/icons/unchecked.png')} style={styles.icon} />
