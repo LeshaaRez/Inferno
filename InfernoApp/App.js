@@ -5,6 +5,7 @@ import BottomTabNavigator from './components/BottomTabNavigator';
 import QuizScreen from './components/QuizScreen';
 import AchievementsScreen from './components/AchievementsScreen';
 
+
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -15,6 +16,7 @@ const App = () => {
         <Stack.Screen name="MainScreen" component={BottomTabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="Achievements" component={AchievementsScreen} options={{ headerShown: false }} />
         <Stack.Screen name="QuizScreen" component={QuizScreen} options={{ headerShown: false }} />
+      
       </Stack.Navigator>
     </NavigationContainer>
   );

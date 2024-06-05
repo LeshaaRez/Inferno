@@ -1,44 +1,90 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import axios from 'axios';
+import QuizScreenModal from './QuizScreenModal';  // Import the separate modal component
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const QuizScreen = ({ route }) => {
+const QuizScreen = ({ route, navigation }) => {
     const { quizId } = route.params;
     const [questions, setQuestions] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [backgroundImage, setBackgroundImage] = useState(null);
+    const [quizTitle, setQuizTitle] = useState('');
+    const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [score, setScore] = useState(0);
+    const [userId, setUserId] = useState(null); // Define userId state
 
     useEffect(() => {
-        const fetchQuestions = async () => {
+        const fetchQuizData = async () => {
             try {
-                const response = await axios.get(`http://192.168.1.117:3000/quiz_questions/${quizId}`);
-                if (response.data && Array.isArray(response.data)) {
-                    setQuestions(response.data);
-                    // Set background image from the first question if available
-                    setBackgroundImage(response.data[0]?.background_image_url || null);
-                } else {
-                    console.error('Received data is not an array:', response.data);
+                const quizResponse = await axios.get(`http://192.168.1.117:3000/quiz_info/${quizId}`);
+                if (quizResponse.data) {
+                    setQuizTitle(quizResponse.data.title);
+                    const questionsResponse = await axios.get(`http://192.168.1.117:3000/quiz_questions/${quizId}`);
+                    if (questionsResponse.data) {
+                        setQuestions(questionsResponse.data.map(question => ({
+                            ...question,
+                            shuffledAnswers: shuffleAnswers([
+                                question.correct_answer,
+                                question.wrong_answer1,
+                                question.wrong_answer2,
+                                question.wrong_answer3
+                            ])
+                        })));
+                        setBackgroundImage(questionsResponse.data[0]?.background_image_url || null);
+                    }
                 }
             } catch (error) {
-                console.error('Error fetching questions:', error);
+                console.error('Error fetching quiz data:', error);
             }
         };
 
-        fetchQuestions();
+        fetchQuizData();
     }, [quizId]);
 
-    const handleAnswerSelect = (answer) => {
+    useEffect(() => {
+        const fetchUserDetails = async () => {
+            try {
+                const userId = await AsyncStorage.getItem('userId');
+                if (!userId) {
+                    console.error('User ID not found');
+                    return;
+                }
+                setUserId(userId); // Correctly set userId here
+            } catch (error) {
+                console.error('Error fetching user details:', error);
+            }
+        };
+
+        fetchUserDetails();
+    }, []); // Ensure this runs once after initial mount
+
+    const shuffleAnswers = answers => {
+        for (let i = answers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [answers[i], answers[j]] = [answers[j], answers[i]];
+        }
+        return answers;
+    };
+
+    const handleAnswerSelect = answer => {
         setSelectedAnswer(answer);
+        if (answer === questions[currentQuestionIndex].correct_answer) {
+            setCorrectAnswersCount(correctAnswersCount + 1);
+        }
+
         if (currentQuestionIndex < questions.length - 1) {
             setTimeout(() => {
                 setCurrentQuestionIndex(currentQuestionIndex + 1);
                 setSelectedAnswer(null);
-                // Update background image as we move to the next question
                 setBackgroundImage(questions[currentQuestionIndex + 1]?.background_image_url || null);
-            }, 1000); // Delay to show the selection for a short period
+            }, 1000);
         } else {
-            // Handle quiz completion here
+            const finalScore = ((correctAnswersCount + (answer === questions[currentQuestionIndex].correct_answer ? 1 : 0)) / questions.length) * 100;
+            setScore(finalScore);
+            setModalVisible(true);
         }
     };
 
@@ -47,88 +93,105 @@ const QuizScreen = ({ route }) => {
     }
 
     const currentQuestion = questions[currentQuestionIndex];
+
     return (
-        
         <ImageBackground
-        
             style={styles.container}
             source={{ uri: backgroundImage || undefined }}
             resizeMode="cover"
         >
             <View style={styles.modalContainer}>
-            <Text style={styles.questionText}>{currentQuestion.question_text}</Text>
-            <View style={styles.answersContainer}>
-                {[currentQuestion.correct_answer, currentQuestion.wrong_answer1, currentQuestion.wrong_answer2, currentQuestion.wrong_answer3].map((answer, index) => (
-                    <TouchableOpacity key={index}
-                        style={[
-                            styles.answerButton,
-                            selectedAnswer === answer && (answer === currentQuestion.correct_answer ? styles.correctAnswer : styles.wrongAnswer)
-                        ]}
-                        onPress={() => handleAnswerSelect(answer)}
-                    >
-                        <Text style={styles.answerText}>{answer}</Text>
-                    </TouchableOpacity>
-                ))}
+                <Text style={styles.quizTitle}>{quizTitle}</Text>
+                <Text style={styles.questionText}>{currentQuestion.question_text}</Text>
+                <Text style={styles.questionNumber}>{`${currentQuestionIndex + 1}/${questions.length}`}</Text>
+                <View style={styles.answersContainer}>
+                    {currentQuestion.shuffledAnswers.map((answer, index) => (
+                        <TouchableOpacity key={index}
+                            style={[
+                                styles.answerButton,
+                                selectedAnswer === answer && (answer === currentQuestion.correct_answer ? styles.correctAnswer : styles.wrongAnswer)
+                            ]}
+                            onPress={() => handleAnswerSelect(answer)}
+                        >
+                            <Text style={styles.answerText}>{answer}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
             </View>
-            </View>
+            {modalVisible && userId && <QuizScreenModal
+                isVisible={modalVisible}
+                onModalClose={() => setModalVisible(false)}
+                score={score}
+                quizId={quizId}
+                userId={userId}
+                navigation={navigation}
+            />}
         </ImageBackground>
-        
     );
 };
 
 const styles = StyleSheet.create({
-
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     modalContainer: {
         width: '100%',
         height: '100%',
-        flex: 1,
+       
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
-    container: {
+    quizTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: 'white',
         
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        
-        
+        textAlign: 'center',
+        marginBottom: 150,
+        marginTop: -50
     },
     questionText: {
         fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 80,
-        color: 'white', // Improved visibility on potential dark backgrounds
+        // fontWeight: 'bold',
+        color: 'white',
         textAlign: 'center',
+        marginBottom: 10,
+    },
+    questionNumber: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: 'white',
+        textAlign: 'center',
+        marginBottom: 30,
     },
     answersContainer: {
         width: '90%',
         marginBottom: 20,
-        
-        
     },
     answerButton: {
         padding: 10,
-        backgroundColor: 'rgba(255, 255, 255, 0.8)', // Transparency for button background
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
         borderRadius: 35,
         marginBottom: 10,
         height: 55,
-        borderColor: '#FC6636', // Добавляем оранжевую границу
-        borderWidth: 2, // Ширина границы
+        borderColor: '#FC6636',
+        borderWidth: 2,
     },
     answerText: {
         fontSize: 18,
         textAlign: 'center',
-        // color: '#FD6927'
-        
+        color: '#FC6636'
     },
     correctAnswer: {
         borderColor: '#2E8F16',
-        borderWidth: 6
+        borderWidth: 6,
     },
     wrongAnswer: {
         borderColor: '#FC3636',
-        borderWidth: 6
+        borderWidth: 6,
     },
 });
 

@@ -491,3 +491,41 @@ app.get('/quiz_questions/:quizId', async (req, res) => {
         }
     });
 })
+
+app.post('/save_result', (req, res) => {
+    const { userId, quizId, score, rating } = req.body;
+
+    if (!userId || !quizId || score === undefined || rating === undefined) {
+        return res.status(400).send({ error: 'Invalid input data' });
+    }
+
+    const insertResultQuery = 'INSERT INTO result (user_id, quiz_id, score, rating, date_taken) VALUES (?, ?, ?, ?, NOW())';
+    db.query(insertResultQuery, [userId, quizId, score, rating], (err, result) => {
+        if (err) {
+            console.error('Error inserting result:', err.stack);
+            return res.status(500).send({ error: 'Database query failed at insert result' });
+        }
+
+        const updateRatingQuery = `
+            UPDATE quiz q
+            SET q.currency_amount = (
+                SELECT AVG(rating) 
+                FROM result 
+                WHERE quiz_id = ?
+            )
+            WHERE q.quiz_id = ?;
+        `;
+
+        db.query(updateRatingQuery, [quizId, quizId], (err, result) => {
+            if (err) {
+                console.error('Error updating quiz rating:', err.stack);
+                return res.status(500).send({ error: 'Database query failed at update rating' });
+            }
+
+            res.send({ message: 'Result saved and rating updated successfully' });
+        });
+    });
+});
+
+
+
