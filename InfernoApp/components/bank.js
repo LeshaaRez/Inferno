@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Dimensions, Linking } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ImageBackground } from 'react-native';
 import BankModal from './BankModal';
 import HintsModal from './HintsModal';
 
@@ -7,33 +7,7 @@ const ShopScreen = () => {
     const [isBankModalVisible, setIsBankModalVisible] = useState(false);
     const [isHintsModalVisible, setIsHintsModalVisible] = useState(false);
 
-    const handlePurchase = async () => {
-        const paymentData = {
-            'action': 'pay',
-            'amount': '10',
-            'currency': 'USD',
-            'description': 'Преміум акаунт',
-            'order_id': 'order_id_1',
-            'version': '3'
-        };
-        try {
-            const response = await fetch('https://your-server.com/payment', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(paymentData)
-            });
-            const result = await response.json();
-            if (result.success) {
-                Linking.openURL(result.payment_url);
-            } else {
-                console.error('Payment failed:', result.error);
-            }
-        } catch (error) {
-            console.error('Error processing payment:', error);
-        }
-    };
+    const token = 'uo2CJ1WKL8dTMx9dDbRFKVa5XFdjrJ1F-rMwPpQFdLBA'; // Ваш реальный токен
 
     return (
         <ImageBackground source={require('../assets/background/Ellipse3.png')} style={styles.container}>
@@ -59,10 +33,11 @@ const ShopScreen = () => {
                     <Text style={styles.arrow}>{' >'}</Text>
                 </View>
             </TouchableOpacity>
+
             <BankModal
                 visible={isBankModalVisible}
                 onClose={() => setIsBankModalVisible(false)}
-                handlePurchase={handlePurchase}
+                token={token} // Передача токена в BankModal
             />
             <HintsModal
                 visible={isHintsModalVisible}

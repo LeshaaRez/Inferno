@@ -1,31 +1,30 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Image, Modal, Dimensions, Linking, TouchableWithoutFeedback } from 'react-native';
 
-const BankModal = ({ visible, onClose }) => {
+const BankModal = ({ visible, onClose, token }) => {
     const handlePurchase = async (bank) => {
         const paymentData = {
-            action: 'pay',
-            amount: '10',
-            currency: 'USD',
-            description: 'Преміум акаунт',
-            order_id: 'order_id_1',
-            version: '3',
-            bank: bank, // Adding bank to payment data
+            amount: 1000, // Сумма в копейках (10 USD = 1000 копеек)
+            currency: 'UAH', // Установите правильную валюту
+            merchantPaymInfo: {
+                reference: 'Преміум акаунт',
+            },
         };
         try {
-            const response = await fetch('https://your-server.com/payment', {
+            const response = await fetch('https://api.monobank.ua/api/merchant/invoice/create', {
                 method: 'POST',
                 headers: {
+                    'X-Token': token,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(paymentData),
             });
             const result = await response.json();
-            if (result.success) {
+            if (result.pageUrl) {
                 // Open the payment form URL in the browser
-                Linking.openURL(result.payment_url);
+                Linking.openURL(result.pageUrl);
             } else {
-                console.error('Payment failed:', result.error);
+                console.error('Payment failed:', result.errText);
             }
         } catch (error) {
             console.error('Error processing payment:', error);
