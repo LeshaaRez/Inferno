@@ -66,9 +66,9 @@ const InfoModalQuizInfo = ({ visible, quizId, onClose, navigation}) => {
                                  }}
                             
                             >
-                                <Image source={require('../assets/button.png')} style={styles.buttonImage} />
+                                <Image source={require('../assets/buttonStart.png')} style={styles.buttonImage} />
                                 
-                                <Text style={styles.buttonText}>Почати</Text>
+
                             </TouchableOpacity>
                             <Text style={styles.footerText}>
                                 Крім того ви можете завітати на наш сайт та прочитати про дану тему:
@@ -155,7 +155,9 @@ const styles = StyleSheet.create({
         height: 50, 
     },
     buttonImage: {
-        resizeMode: 'stretch', // изменено
+        width: 300,
+        height: 70,
+        resizeMode: 'contain',
     },
     footerText: {
         fontSize: 14,
