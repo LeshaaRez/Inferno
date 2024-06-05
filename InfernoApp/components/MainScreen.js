@@ -345,6 +345,9 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: 'white',
         fontWeight: 'bold',
+        textShadowColor: 'black', // Цвет обводки
+        textShadowOffset: { width: 0, height: 0 }, // Смещение тени
+        textShadowRadius: 7, // Радиус тени
     },
     quizItemRatingContainer: {
         flexDirection: 'row',
