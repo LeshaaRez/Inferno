@@ -36,7 +36,7 @@ const ShopScreen = () => {
     };    
 
     return (
-        <ImageBackground source={require('D:/AAA111un/Inferno/InfernoApp/assets/background/Ellipse3.png')} style={styles.container}>
+        <ImageBackground source={require('../assets/background/Ellipse3.png')} style={styles.container}>
             <View style={styles.header}>
                 <TouchableOpacity
                     style={styles.backButtonContainer}
@@ -69,15 +69,15 @@ const ShopScreen = () => {
             >
                 <TouchableOpacity style={styles.centeredView} onPress={() => setModalVisible(false)} activeOpacity={1}>
                     <View style={styles.modalView}>
-                        <Image source={require('D:/AAA111un/Inferno/InfernoApp/assets/bank/moneyfire.png')} style={styles.image} />
+                        <Image source={require('../assets/bank/moneyfire.png')} style={styles.image} />
                         <Text style={styles.premiumText}>Преміум акаунт</Text>
                         <Text style={styles.priceText}>10$</Text>
                         <Text style={styles.descriptionText}>Він передбачає: необмежену кількість спроб, додаткові підказки, можливість сворювати власні вікторини.</Text>
                         <Text style={styles.paymentText}>{"\n"}Ви можете оплатити за допомогою:</Text>
                         <View style={styles.imagesContainer}>
-                            <Image source={require('D:/AAA111un/Inferno/InfernoApp/assets/bank/monobank.png')} style={styles.paymentImage} />
-                            <Image source={require('D:/AAA111un/Inferno/InfernoApp/assets/bank/osad.png')} style={styles.paymentImage} />
-                            <Image source={require('D:/AAA111un/Inferno/InfernoApp/assets/bank/Privat24_Logo.png')} style={styles.paymentImage} />
+                            <Image source={require('..assets/bank/monobank.png')} style={styles.paymentImage} />
+                            <Image source={require('../assets/bank/osad.png')} style={styles.paymentImage} />
+                            <Image source={require('../assets/bank/Privat24_Logo.png')} style={styles.paymentImage} />
                         </View>
                         <TouchableOpacity style={styles.overlayButton} onPress={handlePurchase}>
                             <Text style={styles.overlayButtonText}>Купити</Text>

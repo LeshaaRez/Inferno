@@ -6,6 +6,7 @@ import PlaceholderScreen from './PlaceholderScreen';
 import ProfileScreen from './ProfileScreen';
 import MainScreen from './MainScreen';
 import CreateQuiz from './CreateQuiz';
+import Bank from './bank';
 
 const Tab = createBottomTabNavigator();
 
@@ -59,7 +60,7 @@ function BottomTabNavigator() {
       })}
     >
       <Tab.Screen name="Main" component={MainScreen} />
-      <Tab.Screen name="Shop" component={PlaceholderScreen} />
+      <Tab.Screen name="Shop" component={Bank} />
       <Tab.Screen name="Create" component={CreateQuiz} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
