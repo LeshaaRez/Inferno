@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuItemText: {
-    fontSize: 18,
+    fontSize: 19,
     color: '#FD6927',
   },
   arrowIcon: {

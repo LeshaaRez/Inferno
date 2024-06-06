@@ -29,7 +29,7 @@ const BankModal = ({ visible, onClose, token }) => {
                 return;
             }
         const paymentData = {
-            amount: 1000, // Сумма в копейках (10 USD = 1000 копеек)
+            amount: 10000, // Сумма в копейках (10 USD = 1000 копеек)
             currency: 'UAH', // Установите правильную валюту
             merchantPaymInfo: {
                 reference: 'Преміум акаунт',
@@ -69,7 +69,7 @@ const BankModal = ({ visible, onClose, token }) => {
                         <View style={styles.modalView}>
                             <Image source={require('../assets/bank/moneyfire.png')} style={styles.image} />
                             <Text style={styles.premiumText}>Преміум акаунт</Text>
-                            <Text style={styles.priceText}>10$</Text>
+                            <Text style={styles.priceText}>100$</Text>
                             <Text style={styles.descriptionText}>Він передбачає: необмежену кількість спроб, додаткові підказки, можливість сворювати власні вікторини.</Text>
                             {isPremium ? (
                                 <Text style={styles.paymentText}>Ви вже купили преміум акаунт</Text>
