@@ -47,10 +47,11 @@ const QuizScreenModal = ({ isVisible, onModalClose, score, quizId, userId, navig
                 <View style={styles.modalContent}>
                     <Image source={resultImage} style={styles.resultImage} />
                     <Text style={styles.resultText}>{`${Math.round(score)}% ${resultText}`}</Text>
-                    <TouchableOpacity style={styles.startButton} onPress={handleClose}>
-                        <Image source={require('../assets/but.jpg')} style={styles.buttonImage} />
-                        <Text style={styles.buttonText}></Text>
-                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.startButton}
+                            onPress={handleQuizFinish}>
+                                <Image source={require('../assets/but.jpg')} style={styles.buttonImage} />
+                                <Text style={styles.buttonText}></Text>
+                            </TouchableOpacity>
                     <Text style={styles.ratingText}>Оцініть пройдену вікторину:</Text>
                     <View style={styles.ratingContainer}>
                         {[1, 2, 3, 4, 5].map(star => (
