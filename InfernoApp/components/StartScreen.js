@@ -34,12 +34,10 @@ const StartScreen = ({ navigation }) => {
                     />
                 </View>
                 <View style={styles.textContainer}>
-                    <Text style={styles.text}>
-                        Якщо ви вже зареєстровані
                         <TouchableOpacity onPress={() => setLogInModalVisible(true)}>
-                            <Text style={styles.linkText}> Увійдіть</Text>
+                          <Text style={styles.text}>Якщо ви вже зареєстровані <Text style={styles.linkText}>Увійдіть </Text></Text>
                         </TouchableOpacity>
-                    </Text>
+                    
                 </View>
             </SafeAreaView>
 
@@ -108,8 +106,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     linkText: {
-        fontSize: 16,
+        fontSize: 18,
         color: '#FC6636',
+        // marginBottom: -3,
     },
 });
 
