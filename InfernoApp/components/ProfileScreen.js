@@ -25,6 +25,8 @@ const ProfileScreen = ({ navigation }) => {
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
   const [isBankModalVisible, setIsBankModalVisible] = useState(false); // State for Bank modal
 
+  const token = 'uo2CJ1WKL8dTMx9dDbRFKVa5XFdjrJ1F-rMwPpQFdLBA'; // Ваш реальный токен
+
   const fetchProfile = async () => {
     try {
       const userId = await AsyncStorage.getItem('userId');
@@ -167,6 +169,7 @@ const ProfileScreen = ({ navigation }) => {
       <BankModal
         visible={isBankModalVisible}
         onClose={() => setIsBankModalVisible(false)}
+        token={token}
         handlePurchase={handlePurchase}
       />
     </ImageBackground>
