@@ -102,11 +102,14 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     line: {
-        width: '100%',
+        width: '90%', 
         height: 1,
-        backgroundColor: 'white',
+        backgroundColor: 'rgba(255, 255, 255, 0.3)', 
         marginVertical: 10,
+        alignSelf: 'center', 
     },
+    
+    
 });
 
 export default ShopScreen;
