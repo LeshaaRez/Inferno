@@ -14,7 +14,7 @@ const InfoModalQuizInfo = ({ visible, quizId, onClose, navigation}) => {
 
     const fetchQuizInfo = async (id) => {
         try {
-            const response = await axios.get(`http://192.168.1.117:3000/quiz_info/${id}`);
+            const response = await axios.get(`http://192.168.1.7:3000/quiz_info/${id}`);
             setQuizInfo(response.data);
         } catch (error) {
             console.error('Error fetching quiz info:', error);

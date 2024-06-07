@@ -17,11 +17,11 @@ const AchievementsScreen = ({ navigation }) => {
           return;
         }
 
-        const response = await axios.get(`http://192.168.31.222:3000/achievements?userId=${userId}`);
+        const response = await axios.get(`http://192.168.1.7:3000/achievements?userId=${userId}`);
         setAchievements(response.data);
         setAchievementsCount(response.data.filter(item => item.achieved).length);
 
-        const profileResponse = await axios.get(`http://192.168.31.222:3000/profile?userId=${userId}`);
+        const profileResponse = await axios.get(`http://192.168.1.7:3000/profile?userId=${userId}`);
         setQuizzesCount(profileResponse.data.quizzesCount);
       } catch (error) {
         console.error('Error fetching achievements:', error);

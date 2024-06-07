@@ -20,7 +20,7 @@ const ProfileMyQuizzes = ({ visible, onClose }) => {
         return;
       }
 
-      const response = await axios.get(`http://192.168.31.222:3000/my-quizzes?userId=${userId}`);
+      const response = await axios.get(`http://192.168.1.7:3000/my-quizzes?userId=${userId}`);
       setQuizzes(response.data);
     } catch (error) {
       console.error('Error fetching quizzes:', error);

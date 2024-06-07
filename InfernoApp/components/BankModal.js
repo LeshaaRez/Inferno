@@ -29,8 +29,8 @@ const BankModal = ({ visible, onClose, token }) => {
                 return;
             }
         const paymentData = {
-            amount: 10000, // Сумма в копейках (10 USD = 1000 копеек)
-            currency: 'UAH', // Установите правильную валюту
+            amount: 10000, 
+            currency: 'UAH', 
             merchantPaymInfo: {
                 reference: 'Преміум акаунт',
             },
@@ -46,7 +46,6 @@ const BankModal = ({ visible, onClose, token }) => {
             });
             const result = await response.json();
             if (result.pageUrl) {
-                // Open the payment form URL in the browser
                 Linking.openURL(result.pageUrl);
             } else {
                 console.error('Payment failed:', result.errText);

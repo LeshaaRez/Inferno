@@ -72,12 +72,11 @@ app.post('/google-login', async (req, res) => {
     try {
         const ticket = await client.verifyIdToken({
             idToken,
-            audience: '274956882933-mlfraac6hed4vsn4pitt3vpndkd80k5p.apps.googleusercontent.com', // Specify your Google OAuth client ID
+            audience: '274956882933-mlfraac6hed4vsn4pitt3vpndkd80k5p.apps.googleusercontent.com',
         });
         const payload = ticket.getPayload();
         const email = payload.email;
 
-        // Check if the user already exists in the database
         const query = 'SELECT user_id FROM user WHERE email = ?';
         db.query(query, [email], (err, results) => {
             if (err) {
@@ -88,7 +87,6 @@ app.post('/google-login', async (req, res) => {
             if (results.length > 0) {
                 res.send({ success: true, userId: results[0].user_id });
             } else {
-                // Register the user if not already in the database
                 const newUserQuery = 'INSERT INTO user (email) VALUES (?)';
                 db.query(newUserQuery, [email], (err, result) => {
                     if (err) {

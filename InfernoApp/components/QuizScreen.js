@@ -19,10 +19,10 @@ const QuizScreen = ({ route, navigation }) => {
     useEffect(() => {
         const fetchQuizData = async () => {
             try {
-                const quizResponse = await axios.get(`http://192.168.1.117:3000/quiz_info/${quizId}`);
+                const quizResponse = await axios.get(`http://192.168.1.7:3000/quiz_info/${quizId}`);
                 if (quizResponse.data) {
                     setQuizTitle(quizResponse.data.title);
-                    const questionsResponse = await axios.get(`http://192.168.1.117:3000/quiz_questions/${quizId}`);
+                    const questionsResponse = await axios.get(`http://192.168.1.7:3000/quiz_questions/${quizId}`);
                     if (questionsResponse.data) {
                         setQuestions(questionsResponse.data.map(question => ({
                             ...question,
@@ -52,14 +52,14 @@ const QuizScreen = ({ route, navigation }) => {
                     console.error('User ID not found');
                     return;
                 }
-                setUserId(userId); // Correctly set userId here
+                setUserId(userId);
             } catch (error) {
                 console.error('Error fetching user details:', error);
             }
         };
 
         fetchUserDetails();
-    }, []); // Ensure this runs once after initial mount
+    }, []); 
 
     const shuffleAnswers = answers => {
         for (let i = answers.length - 1; i > 0; i--) {
