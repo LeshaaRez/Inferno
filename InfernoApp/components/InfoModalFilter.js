@@ -131,7 +131,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 20,
         alignSelf: 'center',
-        fontFamily: 'Cagliostro', // Set the font here
         color: '#FC6636',
     },
     sectionTitle: {
