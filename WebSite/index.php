@@ -3,7 +3,24 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-$mysqli = new mysqli("localhost", "root", "123", "inferno");
+$host = 'inferno-bd.mysql.database.azure.com';
+$username = 'inferno';
+$password = 'Danilkoko!1';
+$db_name = 'inferno';
+
+//Initializes MySQLi
+$mysqli = mysqli_init();
+
+mysqli_ssl_set($mysqli,NULL,NULL, "assets/DigiCertGlobalRootCA.crt.pem", NULL, NULL);
+
+// Establish the connection
+mysqli_real_connect($mysqli, $host, $username, $password, $db_name, 3306, NULL, MYSQLI_CLIENT_SSL);
+
+//If connection failed, show the error
+if (mysqli_connect_errno())
+{
+    die('Failed to connect to MySQL: '.mysqli_connect_error());
+}
 
 if ($mysqli->connect_error) {
     die("Connection failed: " . $mysqli->connect_error);
