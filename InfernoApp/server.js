@@ -38,16 +38,34 @@ app.use(cors()); // Добавьте это для включения CORS
 
 app.post('/signup', (req, res) => {
     const { fullName, email, password } = req.body;
-    const query = 'INSERT INTO user (username, email, password) VALUES (?, ?, ?)';
-    db.query(query, [fullName, email, password], (err, result) => {
+    const userQuery = 'INSERT INTO user (username, email, password) VALUES (?, ?, ?)';
+    
+    db.query(userQuery, [fullName, email, password], (err, result) => {
         if (err) {
             console.error('Error executing query:', err.stack);
             res.status(500).send({ error: 'Database query failed' });
             return;
         }
-        res.send({ message: 'User registered successfully', userId: result.insertId }); // Возвращаем userId
+
+        const userId = result.insertId;
+        const profileQuery = 'INSERT INTO profile (user_id, avatar, bio, hints_count, premium_status) VALUES (?, ?, ?, ?, ?)';
+        const defaultAvatar = 'avatar1.png';  // или другой путь к аватару по умолчанию
+        const defaultBio = '';
+        const defaultHintsCount = 5;
+        const defaultPremiumStatus = 0;
+
+        db.query(profileQuery, [userId, defaultAvatar, defaultBio, defaultHintsCount, defaultPremiumStatus], (err, result) => {
+            if (err) {
+                console.error('Error executing profile query:', err.stack);
+                res.status(500).send({ error: 'Profile creation failed' });
+                return;
+            }
+
+            res.send({ message: 'User registered successfully and profile created', userId: userId });
+        });
     });
 });
+
 
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
