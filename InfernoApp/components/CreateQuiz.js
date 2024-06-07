@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#FF6347',
         borderRadius: 10,
-        marginBottom: 20,
+        marginBottom: 70,
         backgroundColor: 'rgba(255, 99, 71, 0.3)',
     },
     questionLabel: {
@@ -426,6 +426,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 30,
         right: 30,
+        marginBottom: 45,
     },
     addButtonText: {
         color: '#fff',
